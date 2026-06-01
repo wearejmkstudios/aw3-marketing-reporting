@@ -1,0 +1,18 @@
+{
+  "name": "aw3-marketing-reporting",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "refresh:data": "python3 scripts/extract_report_data.py"
+  },
+  "dependencies": {
+    "next": "^14.2.23",
+    "next-auth": "^4.24.11",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AW3 Marketing Reporting</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="loading-screen" class="loading-screen" role="status" aria-live="polite" aria-label="Loading AW3 D.O.G.E. report">
+      <div class="loader-card">
+        <img src="./assets/aw3-doge-logo.png" alt="" aria-hidden="true" />
+        <p class="label">D.O.G.E. Report Engine</p>
+        <h2>Loading growth efficiency data</h2>
+        <div class="loader-bar" aria-hidden="true"><span></span></div>
+        <p class="loader-note">Cross-referencing marketing, pipeline, and financial metrics.</p>
+      </div>
+    </div>
+    <aside class="rail">
+      <img src="./assets/aw3-logo-black-square.png" alt="AW3" class="aw3-logo" />
+      <button id="rail-toggle" class="rail-toggle" type="button" aria-expanded="true" aria-controls="rail-nav">
+        <span aria-hidden="true"></span>
+        <span class="rail-toggle-text">Collapse menu</span>
+      </button>
+      <nav id="rail-nav" aria-label="Report sections">
+        <a href="#scorecard">Scorecard</a>
+        <a href="#comparisons">Comparisons</a>
+        <a href="#channels">Channels</a>
+        <a href="#funnel">Funnel</a>
+        <a href="#data-chat">AI Chat</a>
+        <a href="#actions">Actions</a>
+      </nav>
+    </aside>
+
+    <main class="report page-shell">
+      <header class="topbar">
+        <div>
+          <p class="department">Department of Growth Efficiency</p>
+          <h1>AW3 Marketing Reporting</h1>
+          <div class="meta-row">
+            <span>Compared with April 2026</span>
+            <span>Compared with May 2025</span>
+            <span>Source: Marketing + Financial Sheets</span>
+            <span id="data-status">Loading historical data</span>
+          </div>
+        </div>
+        <div class="brand-stack">
+          <div class="brand-lockup">
+            <img src="./assets/aw3-doge-logo.png" alt="D.O.G.E. department logo" />
+            <div class="toggle" aria-label="Output mode">
+              <button class="active">Web</button>
+              <button>Slides</button>
+            </div>
+          </div>
+          <div class="report-actions" aria-label="Report actions">
+            <p class="last-updated">Last Updated: <time id="last-updated">Loading</time></p>
+            <div class="action-buttons">
+              <button id="refresh-data" type="button">Refresh</button>
+              <button id="export-report" type="button">Custom Export</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="comparison-switcher" aria-label="Comparison period switcher">
+        <div>
+          <p class="label">Comparison View</p>
+          <h2 id="comparison-title">Month-by-month performance</h2>
+          <p id="comparison-copy">Compare May 2026 against April 2026 and May 2025 using the current monthly tracker.</p>
+        </div>
+        <div class="switcher-controls">
+          <div class="date-picker">
+            <button id="date-trigger" class="date-trigger" type="button" aria-expanded="false" aria-controls="date-popover">
+              <span>Date range</span>
+              <strong id="date-label">May 2026</strong>
+            </button>
+            <div id="date-popover" class="date-popover" hidden>
+              <div class="preset-row" aria-label="Date range presets">
+                <button type="button" data-preset="last-month">Last Month</button>
+                <button type="button" data-preset="quarter">This FQ</button>
+                <button type="button" data-preset="year">FYTD</button>
+              </div>
+              <label class="year-picker-label" for="year-picker">Financial year</label>
+              <select id="year-picker" class="year-picker"></select>
+              <div class="month-grid" id="month-grid" aria-label="Select report month range"></div>
+              <div class="date-actions">
+                <span id="date-helper">Selected: May 2026</span>
+                <button type="button" id="date-apply">Apply</button>
+              </div>
+            </div>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Comparison views">
+            <button class="active" role="tab" aria-selected="true" data-view="mom">Month by Month</button>
+            <button role="tab" aria-selected="false" data-view="fq">FQ by FQ</button>
+            <button role="tab" aria-selected="false" data-view="yoy">YoY</button>
+            <button role="tab" aria-selected="false" data-view="fy">FY View</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero">
+        <div>
+          <p class="label">Executive Read</p>
+          <h2>Efficiency rebounded sharply, but deal quality still needs pressure.</h2>
+          <p>
+            May cut spend by 34.3% month over month while increasing leads by 40.3%.
+            The financial cross-check shows revenue rose 84.8% MoM to GBP 148,296,
+            but remained 28.3% below May 2025 and 55.1% below target.
+          </p>
+        </div>
+        <div class="hero-stat">
+          <span>MER</span>
+          <strong>2.88</strong>
+          <em>+203.2% vs April</em>
+        </div>
+      </section>
+
+      <section id="scorecard" class="kpi-grid" aria-label="KPI scorecard">
+        <article class="kpi blue"><span>Total Spend</span><strong>GBP 41,959</strong><em class="good">-34.3% MoM</em></article>
+        <article class="kpi green"><span>Leads</span><strong>822</strong><em class="good">+40.3% MoM</em></article>
+        <article class="kpi amber"><span>New Opptys</span><strong>62</strong><em class="good">+67.6% MoM</em></article>
+        <article class="kpi violet"><span>Deals Won</span><strong>10</strong><em class="good">+150.0% MoM</em></article>
+        <article class="kpi"><span>AOV</span><strong>GBP 12,068</strong><em class="bad">-20.2% MoM</em></article>
+        <article class="kpi green"><span>ROAS</span><strong>287.6%</strong><em class="good">+203.8% MoM</em></article>
+        <article class="kpi green"><span>MER</span><strong>2.88</strong><em class="good">+203.2% MoM</em></article>
+        <article class="kpi amber"><span>Total Deal Size</span><strong>GBP 120,675</strong><em class="good">+99.5% MoM</em></article>
+      </section>
+
+      <section class="finance-band" aria-label="Financial cross-reference">
+        <div>
+          <p class="label">Financial Cross-Reference</p>
+          <h3>Marketing efficiency improved, but revenue is still behind target and last year.</h3>
+        </div>
+        <div class="finance-grid">
+          <article><span>Total revenue</span><strong>GBP 148,296</strong><em class="good">+84.8% MoM</em></article>
+          <article><span>Revenue vs May 2025</span><strong>-28.3%</strong><em class="bad">GBP 58,507 lower</em></article>
+          <article><span>Revenue vs target</span><strong>-55.1%</strong><em class="bad">GBP 181,582 gap</em></article>
+          <article><span>Spend / revenue</span><strong>28.3%</strong><em>Revenue MER: 3.53</em></article>
+          <article><span>Deal value / revenue</span><strong>81.4%</strong><em>GBP 120,675 / GBP 148,296</em></article>
+        </div>
+      </section>
+
+      <section class="two-col">
+        <article id="comparisons" class="panel wide">
+          <div class="panel-head">
+            <div>
+              <p class="label">MoM / YoY Comparison</p>
+          <h3>What changed in May</h3>
+          <p class="view-note" id="comparison-note">Current view: May 2026 vs April 2026 and May 2025.</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+              <tr><th>Metric</th><th id="current-period">May 2026</th><th id="period-a">vs Apr 2026</th><th id="period-b">vs May 2025</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Spend</td><td>GBP 41,959</td><td class="good">-34.3%</td><td class="good">-31.1%</td></tr>
+              <tr><td>Leads</td><td>822</td><td class="good">+40.3%</td><td class="good">+55.7%</td></tr>
+              <tr><td>New opportunities</td><td>62</td><td class="good">+67.6%</td><td class="good">+55.0%</td></tr>
+              <tr><td>Deals won</td><td>10</td><td class="good">+150.0%</td><td class="bad">-9.1%</td></tr>
+              <tr><td>Total deal size</td><td>GBP 120,675</td><td class="good">+99.5%</td><td class="bad">-20.7%</td></tr>
+              <tr><td>AOV</td><td>GBP 12,068</td><td class="bad">-20.2%</td><td class="bad">-12.8%</td></tr>
+              <tr><td>Revenue</td><td>GBP 148,296</td><td class="good">+84.8%</td><td class="bad">-28.3%</td></tr>
+              <tr><td>ROAS</td><td>287.6%</td><td class="good">+203.8%</td><td class="good">+15.1%</td></tr>
+              <tr><td>MER</td><td>2.88</td><td class="good">+203.2%</td><td class="good">+15.2%</td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <aside id="actions" class="panel actions">
+          <p class="label">Insights & Next Steps</p>
+          <h3>Prioritised actions</h3>
+          <ol>
+            <li><strong>Audit Google Ads data.</strong><span>May shows GBP 0 spend. Confirm whether this was a true pause or a tracker gap.</span></li>
+            <li><strong>Protect the lower CPL.</strong><span>May produced more leads with less spend. Identify the Meta campaigns responsible.</span></li>
+            <li><strong>Raise deal quality.</strong><span>Lead and opportunity volume improved, but AOV fell 20.2% MoM and 12.8% YoY.</span></li>
+            <li><strong>Reconcile finance and pipeline.</strong><span>Marketing deal value equals 81.4% of May revenue; validate attribution and timing.</span></li>
+            <li><strong>Review close-rate movement.</strong><span>Deals won recovered MoM, while YoY closed-won count and value remain softer.</span></li>
+          </ol>
+        </aside>
+      </section>
+
+      <section class="chart-grid">
+        <article class="panel chart-card">
+          <p class="label">Spend vs Leads</p>
+          <h3>Efficiency improved in May</h3>
+          <div class="bars">
+            <div style="--w: 100%; --c: #2563eb"><span>Apr spend</span><b>GBP 63,905</b></div>
+            <div style="--w: 66%; --c: #2563eb"><span>May spend</span><b>GBP 41,959</b></div>
+            <div style="--w: 71%; --c: #13a538"><span>Apr leads</span><b>586</b></div>
+            <div style="--w: 100%; --c: #13a538"><span>May leads</span><b>822</b></div>
+          </div>
+        </article>
+
+        <article id="channels" class="panel chart-card">
+          <p class="label">Channel Mix</p>
+          <h3>Tracked May spend is all Meta</h3>
+          <div class="donut-wrap">
+            <div class="donut" aria-label="100 percent Meta spend"></div>
+            <div>
+              <p><strong>Meta:</strong> GBP 41,959</p>
+              <p><strong>Google:</strong> GBP 0</p>
+              <p class="muted">Use this as a data-quality flag in the recurring report.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel chart-card finance-card">
+          <p class="label">Revenue Cross-Check</p>
+          <h3>Revenue lifted MoM but missed the annual benchmark</h3>
+          <div class="bars">
+            <div style="--w: 39%; --c: #06b6d4"><span>Apr revenue</span><b>GBP 80,234</b></div>
+            <div style="--w: 72%; --c: #06b6d4"><span>May revenue</span><b>GBP 148,296</b></div>
+            <div style="--w: 100%; --c: #f59e0b"><span>May 2025 revenue</span><b>GBP 206,803</b></div>
+            <div style="--w: 58%; --c: #111111"><span>Deal value</span><b>GBP 120,675</b></div>
+          </div>
+        </article>
+
+        <article id="funnel" class="panel chart-card funnel">
+          <p class="label">Funnel Conversion</p>
+          <h3>Volume moved; conversion needs scrutiny</h3>
+          <div class="funnel-row"><span>Leads</span><div><i style="width: 100%"></i></div><b>822</b></div>
+          <div class="funnel-row"><span>Opptys</span><div><i style="width: 7.54%; background:#f59e0b"></i></div><b>62</b></div>
+          <div class="funnel-row"><span>Won</span><div><i style="width: 1.22%; background:#13a538"></i></div><b>10</b></div>
+          <div class="conversion-pair">
+            <strong>Lead to oppty: 7.54%</strong>
+            <strong>Oppty to won: 16.13%</strong>
+          </div>
+        </article>
+      </section>
+
+      <section id="data-chat" class="ai-chat panel" aria-label="AI data chat">
+        <div class="chat-intro">
+          <p class="label">Ask D.O.G.E. AI</p>
+          <h3>Chat with the report data</h3>
+          <p>
+            Ask about spend, revenue, conversion, ROAS, MER, finance reconciliation,
+            or next actions. This prototype uses the loaded May 2026 data locally.
+          </p>
+          <div class="prompt-chips" aria-label="Suggested prompts">
+            <button type="button" data-prompt="What are the biggest risks this month?">Biggest risks</button>
+            <button type="button" data-prompt="Why did MER improve?">Why MER improved</button>
+            <button type="button" data-prompt="How does marketing compare to finance revenue?">Marketing vs finance</button>
+            <button type="button" data-prompt="What should we do next?">Next steps</button>
+          </div>
+        </div>
+        <div class="chat-window">
+          <div id="chat-log" class="chat-log" aria-live="polite">
+            <article class="message ai">
+              <strong>D.O.G.E. AI</strong>
+              <p>Ready. I can explain the May 2026 movement, compare periods, and call out reconciliation issues.</p>
+            </article>
+          </div>
+          <form id="chat-form" class="chat-form">
+            <label for="chat-input">Ask a question about the data</label>
+            <div>
+              <input id="chat-input" name="question" autocomplete="off" placeholder="e.g. Where should we focus next month?" />
+              <button type="submit">Ask</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+    <script src="./data/report-data.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>

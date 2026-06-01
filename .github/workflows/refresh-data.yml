@@ -1,0 +1,33 @@
+name: Refresh report data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 1 * *"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh Google Sheets data
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: python scripts/extract_report_data.py
+
+      - name: Commit updated report data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Refresh AW3 marketing report data"
+          file_pattern: public/report/data/report-data.json public/report/data/report-data.js
