@@ -144,11 +144,11 @@ def main():
     marketing_bytes = workbook_source("marketing-revops.xlsx", MARKETING_ID)
     financial_bytes = workbook_source("financial-reports.xlsx", FINANCIAL_ID)
     data = {
-        "appName": "AW3 Marketing Reporting",
+        "appName": "AW3® Marketing Reporting",
         "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "generatedFrom": {
-            "marketingWorkbook": "AW3 Marketing & RevOps/Sales Metrics (by FY)",
-            "financialWorkbook": "AW3 Financial Reports by FY",
+            "marketingWorkbook": "AW3® Marketing & RevOps/Sales Metrics (by FY)",
+            "financialWorkbook": "AW3® Financial Reports by FY",
         },
         "marketing": parse_workbook_bytes(marketing_bytes, "marketing-revops.xlsx", "marketing_revops"),
         "financial": parse_workbook_bytes(financial_bytes, "financial-reports.xlsx", "financial_reports"),

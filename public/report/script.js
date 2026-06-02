@@ -375,7 +375,7 @@ function exportReport() {
   const timestamp = formatTimestamp(extractedData?.generatedAt);
   const safeRange = selectedRange.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   const payload = {
-    appName: extractedData?.appName || "AW3 Marketing Reporting",
+    appName: extractedData?.appName || "AW3® Marketing Reporting",
     exportedAt: new Date().toISOString(),
     lastUpdated: timestamp.iso,
     selectedRange,

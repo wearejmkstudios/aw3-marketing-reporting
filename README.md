@@ -1,6 +1,6 @@
-# AW3 Marketing Reporting
+# AW3® Marketing Reporting
 
-Private Google Workspace-protected marketing reporting app for AW3 D.O.G.E.
+Private Google Workspace-protected marketing reporting app for AW3® D.O.G.E.
 
 ## What This Includes
 
@@ -76,8 +76,8 @@ Then it commits changes. Vercel redeploys automatically after the commit.
 2. Enable Google Drive API.
 3. Create a JSON key.
 4. Share both source Google Sheets with the service account email as Viewer:
-   - AW3 Financial Reports by FY
-   - AW3 Marketing & RevOps/Sales Metrics by FY
+   - AW3® Financial Reports by FY
+   - AW3® Marketing & RevOps/Sales Metrics by FY
 5. In GitHub repo settings, add secret:
    - `GOOGLE_SERVICE_ACCOUNT_JSON`
    - Value: full JSON key content.

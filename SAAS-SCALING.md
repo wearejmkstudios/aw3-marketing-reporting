@@ -1,4 +1,4 @@
-# Scaling AW3 Marketing Reporting Into A SaaS
+# Scaling AW3® Marketing Reporting Into A SaaS
 
 ## Recommended SaaS Architecture
 
@@ -110,7 +110,7 @@ Simple SaaS packaging:
 
 ## Practical Build Path
 
-1. Ship AW3 internal app on Vercel with Workspace login.
+1. Ship AW3® internal app on Vercel with Workspace login.
 2. Move report data from frontend JSON to Postgres.
 3. Add organizations and memberships.
 4. Add server-side AI chat.

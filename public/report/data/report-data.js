@@ -1,8 +1,8 @@
 window.REPORT_DATA = {
-  "appName": "AW3 Marketing Reporting",
+  "appName": "AW3® Marketing Reporting",
   "generatedFrom": {
-    "marketingWorkbook": "AW3 Marketing & RevOps/Sales Metrics (by FY)",
-    "financialWorkbook": "AW3 Financial Reports by FY"
+    "marketingWorkbook": "AW3® Marketing & RevOps/Sales Metrics (by FY)",
+    "financialWorkbook": "AW3® Financial Reports by FY"
   },
   "marketing": {
     "file": "marketing-revops.xlsx",

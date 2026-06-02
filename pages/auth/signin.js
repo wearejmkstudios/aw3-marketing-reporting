@@ -7,7 +7,7 @@ export default function SignIn({ callbackUrl, error }) {
   return (
     <>
       <Head>
-        <title>Sign in | AW3 Marketing Reporting</title>
+        <title>Sign in | AW3® Marketing Reporting</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <main className="signin-page">
@@ -15,14 +15,14 @@ export default function SignIn({ callbackUrl, error }) {
           <div className="brand">
             <picture>
               <source srcSet="/auth/aw3-logo-white.png" media="(prefers-color-scheme: dark)" />
-              <img src="/auth/aw3-logo-black.png" alt="AW3" />
+              <img src="/auth/aw3-logo-black.png" alt="AW3®" />
             </picture>
           </div>
 
-          <p className="eyebrow">AW3 Marketing Reporting</p>
+          <p className="eyebrow">AW3® Marketing Reporting</p>
           <h1 id="signin-title">Sign in to view the monthly growth report.</h1>
           <p className="copy">
-            Access is restricted to approved Google Workspace accounts for AW3 reporting.
+            Access is restricted to approved Google Workspace accounts for AW3® reporting.
           </p>
 
           {error ? (
