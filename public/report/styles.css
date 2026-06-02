@@ -13,6 +13,7 @@
   --red: #d73737;
   --amber: #f59e0b;
   --violet: #7c3aed;
+  --hover-shadow: 0 18px 45px rgb(0 0 0 / 10%);
   color-scheme: light dark;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -32,6 +33,7 @@
   --green: #49dc70;
   --red: #ff6969;
   --amber: #fbbf24;
+  --hover-shadow: 0 18px 45px rgb(0 0 0 / 30%);
   color-scheme: dark;
 }
 
@@ -48,6 +50,7 @@
     --green: #49dc70;
     --red: #ff6969;
     --amber: #fbbf24;
+    --hover-shadow: 0 18px 45px rgb(0 0 0 / 30%);
   }
 }
 
@@ -147,7 +150,16 @@ body.rail-collapsed {
   .page-shell.is-ready,
   .page-shell.is-transitioning,
   .reveal,
-  .reveal.is-visible {
+  .reveal.is-visible,
+  .comparison-switcher,
+  .hero,
+  .kpi,
+  .finance-band,
+  .finance-grid article,
+  .panel,
+  .message,
+  .bars div,
+  .funnel-row div {
     opacity: 1;
     transform: none;
     transition: none;
@@ -463,6 +475,7 @@ h1 {
   padding: 34px;
   background: var(--black);
   color: var(--white);
+  transition: transform .2s ease, box-shadow .2s ease;
 }
 
 .comparison-switcher {
@@ -476,6 +489,14 @@ h1 {
   border: 1px solid var(--line);
   padding: 18px 20px;
   background: var(--panel);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.comparison-switcher:hover,
+.comparison-switcher:focus-within {
+  border-color: var(--ink);
+  box-shadow: var(--hover-shadow);
+  transform: translateY(-2px);
 }
 
 .comparison-switcher h2 {
@@ -659,6 +680,21 @@ h1 {
   place-items: center;
   text-align: center;
   border: 1px solid #393939;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+
+.hero:hover,
+.hero:focus-within,
+.finance-band:hover,
+.finance-band:focus-within {
+  box-shadow: var(--hover-shadow);
+  transform: translateY(-2px);
+}
+
+.hero:hover .hero-stat,
+.hero:focus-within .hero-stat {
+  border-color: #6b6b6b;
+  background: rgb(255 255 255 / 4%);
 }
 
 .hero-stat span {
@@ -693,6 +729,14 @@ h1 {
   background: var(--panel);
   padding: 18px 18px 16px;
   border-left: 5px solid var(--ink);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.kpi:hover,
+.kpi:focus-within {
+  border-color: var(--ink);
+  box-shadow: var(--hover-shadow);
+  transform: translateY(-3px);
 }
 
 .kpi.blue { border-left-color: var(--blue); }
@@ -728,6 +772,7 @@ h1 {
   padding: 26px;
   background: var(--black);
   color: var(--white);
+  transition: transform .2s ease, box-shadow .2s ease;
 }
 
 .finance-band h3 {
@@ -747,6 +792,13 @@ h1 {
 .finance-grid article {
   border: 1px solid #373737;
   padding: 15px;
+  transition: border-color .18s ease, background-color .18s ease, transform .18s ease;
+}
+
+.finance-grid article:hover {
+  border-color: #767676;
+  background: rgb(255 255 255 / 5%);
+  transform: translateY(-2px);
 }
 
 .finance-grid span {
@@ -794,6 +846,14 @@ h1 {
   border: 1px solid var(--line);
   background: var(--panel);
   padding: 24px;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.panel:hover,
+.panel:focus-within {
+  border-color: var(--ink);
+  box-shadow: var(--hover-shadow);
+  transform: translateY(-2px);
 }
 
 .panel h3 {
@@ -873,6 +933,18 @@ td:nth-child(n+2), th:nth-child(n+2) {
   position: relative;
   height: 42px;
   background: var(--bar-bg);
+  transition: transform .16s ease, filter .16s ease;
+}
+
+.chart-card:hover .bars div,
+.chart-card:focus-within .bars div {
+  filter: saturate(1.08);
+}
+
+.bars div:hover,
+.funnel-row div:hover {
+  transform: scaleX(1.01);
+  transform-origin: left center;
 }
 
 .bars div::before {
@@ -932,6 +1004,7 @@ td:nth-child(n+2), th:nth-child(n+2) {
 .funnel-row div {
   height: 34px;
   background: var(--bar-bg);
+  transition: transform .16s ease, filter .16s ease;
 }
 
 .funnel-row i {
@@ -1023,6 +1096,33 @@ td:nth-child(n+2), th:nth-child(n+2) {
   border: 1px solid var(--line);
   padding: 14px 15px;
   background: var(--soft);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.message:hover {
+  border-color: var(--ink);
+  box-shadow: var(--hover-shadow);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comparison-switcher:hover,
+  .comparison-switcher:focus-within,
+  .hero:hover,
+  .hero:focus-within,
+  .kpi:hover,
+  .kpi:focus-within,
+  .finance-band:hover,
+  .finance-band:focus-within,
+  .finance-grid article:hover,
+  .panel:hover,
+  .panel:focus-within,
+  .message:hover,
+  .bars div:hover,
+  .funnel-row div:hover {
+    box-shadow: none;
+    transform: none;
+  }
 }
 
 .message.user {
