@@ -242,6 +242,262 @@ const reportData = {
   dealRevenue: "81.4%",
 };
 
+const currencySelect = document.querySelector("#currency-select");
+const refreshFxButton = document.querySelector("#refresh-fx");
+const fxStatus = document.querySelector("#fx-status");
+const baseMoneyMetrics = {
+  spend: 41959,
+  dealValue: 120675,
+  aov: 12068,
+  revenue: 148296,
+  targetGap: 181582,
+};
+const supportedCurrencies = {
+  GBP: { name: "British Pound" },
+  USD: { name: "US Dollar" },
+  EUR: { name: "Euro" },
+  AUD: { name: "Australian Dollar" },
+  CAD: { name: "Canadian Dollar" },
+};
+const baseCurrency = "GBP";
+const fxStorageKey = "aw3-report-fx";
+const currencyStorageKey = "aw3-report-currency";
+const fxTextNodes = [];
+const fxAttributeTemplates = [];
+let fxState = {
+  currency: storedCurrency(),
+  rates: { GBP: 1 },
+  date: null,
+  updatedAt: null,
+  source: "GBP base",
+  loading: false,
+  error: null,
+};
+
+function storedCurrency() {
+  try {
+    const code = localStorage.getItem(currencyStorageKey);
+    return supportedCurrencies[code] ? code : baseCurrency;
+  } catch {
+    return baseCurrency;
+  }
+}
+
+function readCachedFx() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(fxStorageKey) || "null");
+    if (!cached?.rates || cached.base !== baseCurrency) return null;
+    return cached;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedFx(payload) {
+  try {
+    localStorage.setItem(fxStorageKey, JSON.stringify(payload));
+  } catch {
+    // Local storage can be unavailable in strict browser contexts.
+  }
+}
+
+function persistCurrency(code) {
+  try {
+    localStorage.setItem(currencyStorageKey, code);
+  } catch {
+    // Local storage can be unavailable in strict browser contexts.
+  }
+}
+
+function applyCachedFx() {
+  const cached = readCachedFx();
+  if (!cached) return;
+  fxState = {
+    ...fxState,
+    rates: { GBP: 1, ...cached.rates },
+    date: cached.date || null,
+    updatedAt: cached.updatedAt || null,
+    source: cached.source || "Cached FX",
+    error: null,
+  };
+}
+
+function moneyAmountFromText(value) {
+  return Number(String(value).replace(/,/g, ""));
+}
+
+function activeCurrency() {
+  return supportedCurrencies[fxState.currency] ? fxState.currency : baseCurrency;
+}
+
+function activeFxRate(currency = activeCurrency()) {
+  return Number(fxState.rates?.[currency]) || (currency === baseCurrency ? 1 : null);
+}
+
+function formatMoneyFromGbp(amountGbp, currency = activeCurrency()) {
+  const rate = activeFxRate(currency);
+  const targetCurrency = rate ? currency : baseCurrency;
+  const amount = amountGbp * (rate || 1);
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: targetCurrency,
+    currencyDisplay: "code",
+    maximumFractionDigits: 0,
+  }).format(amount).replace(/\u00a0/g, " ");
+}
+
+function convertMoneyTemplate(template) {
+  return template.replace(/GBP\s([\d,]+)/g, (_, amount) => (
+    formatMoneyFromGbp(moneyAmountFromText(amount))
+  ));
+}
+
+function registerCurrencyTemplates() {
+  const root = document.querySelector(".report");
+  if (!root) return;
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement;
+      if (!parent || !/GBP\s[\d,]+/.test(node.nodeValue || "")) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      if (["SCRIPT", "STYLE", "SELECT", "OPTION", "TEXTAREA"].includes(parent.tagName)) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  const textNodes = [];
+  while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+  textNodes.forEach((node) => {
+    const span = document.createElement("span");
+    span.className = "fx-text";
+    span.dataset.fxTextTemplate = node.nodeValue;
+    span.textContent = node.nodeValue;
+    node.replaceWith(span);
+    fxTextNodes.push(span);
+  });
+
+  document.querySelectorAll("[data-annotation]").forEach((element) => {
+    if (!/GBP\s[\d,]+/.test(element.dataset.annotation || "")) return;
+    element.dataset.fxAnnotationTemplate = element.dataset.annotation;
+    fxAttributeTemplates.push(element);
+  });
+}
+
+function syncReportDataMoney() {
+  reportData.spend = formatMoneyFromGbp(baseMoneyMetrics.spend);
+  reportData.dealValue = formatMoneyFromGbp(baseMoneyMetrics.dealValue);
+  reportData.aov = formatMoneyFromGbp(baseMoneyMetrics.aov);
+  reportData.revenue = formatMoneyFromGbp(baseMoneyMetrics.revenue);
+  reportData.targetGap = formatMoneyFromGbp(baseMoneyMetrics.targetGap);
+}
+
+function rateLabel() {
+  const currency = activeCurrency();
+  if (fxState.loading) return "FX: updating live rates...";
+  if (currency === baseCurrency) {
+    return fxState.date ? `FX: GBP base · latest ${fxState.date}` : "FX: GBP base";
+  }
+  const rate = activeFxRate(currency);
+  if (!rate) return "FX unavailable; showing GBP";
+  const date = fxState.date ? ` · latest ${fxState.date}` : "";
+  return `FX: 1 GBP = ${rate.toFixed(4)} ${currency}${date}`;
+}
+
+function updateCurrencyControls() {
+  if (currencySelect) currencySelect.value = activeCurrency();
+  if (fxStatus) fxStatus.textContent = fxState.error || rateLabel();
+}
+
+function renderCurrency() {
+  fxTextNodes.forEach((node) => {
+    node.textContent = convertMoneyTemplate(node.dataset.fxTextTemplate || "");
+  });
+  fxAttributeTemplates.forEach((element) => {
+    element.dataset.annotation = convertMoneyTemplate(element.dataset.fxAnnotationTemplate || "");
+  });
+  syncReportDataMoney();
+  updateCurrencyControls();
+}
+
+async function refreshFxRates({ force = false } = {}) {
+  if (fxState.loading) return;
+  fxState.loading = true;
+  fxState.error = null;
+  updateCurrencyControls();
+  if (refreshFxButton) {
+    refreshFxButton.disabled = true;
+    refreshFxButton.textContent = "Updating";
+  }
+
+  try {
+    const symbols = Object.keys(supportedCurrencies)
+      .filter((currency) => currency !== baseCurrency)
+      .join(",");
+    const response = await fetch(`/api/fx?base=${baseCurrency}&symbols=${symbols}&refresh=${force ? Date.now() : "auto"}`, {
+      cache: force ? "no-store" : "default",
+    });
+    if (!response.ok) {
+      throw new Error(`FX refresh failed with ${response.status}`);
+    }
+    const payload = await response.json();
+    fxState = {
+      ...fxState,
+      rates: { GBP: 1, ...payload.rates },
+      date: payload.date || null,
+      updatedAt: payload.updatedAt || null,
+      source: payload.source || "Frankfurter",
+      loading: false,
+      error: null,
+    };
+    writeCachedFx({
+      base: baseCurrency,
+      rates: fxState.rates,
+      date: fxState.date,
+      updatedAt: fxState.updatedAt,
+      source: fxState.source,
+    });
+  } catch (error) {
+    console.error(error);
+    fxState.loading = false;
+    if (!activeFxRate()) {
+      fxState.currency = baseCurrency;
+      persistCurrency(baseCurrency);
+    }
+    fxState.error = activeCurrency() === baseCurrency
+      ? "FX unavailable; showing GBP base"
+      : "Live FX unavailable; showing cached rate";
+  } finally {
+    fxState.loading = false;
+    if (refreshFxButton) {
+      refreshFxButton.disabled = false;
+      refreshFxButton.textContent = "Update FX";
+    }
+    renderCurrency();
+  }
+}
+
+applyCachedFx();
+registerCurrencyTemplates();
+renderCurrency();
+
+currencySelect?.addEventListener("change", async () => {
+  const nextCurrency = supportedCurrencies[currencySelect.value] ? currencySelect.value : baseCurrency;
+  fxState.currency = nextCurrency;
+  persistCurrency(nextCurrency);
+  if (!activeFxRate(nextCurrency)) {
+    await refreshFxRates({ force: true });
+  } else {
+    renderCurrency();
+  }
+});
+
+refreshFxButton?.addEventListener("click", () => refreshFxRates({ force: true }));
+window.setTimeout(() => refreshFxRates(), 0);
+
 let extractedData = window.REPORT_DATA || null;
 const dataStatus = document.querySelector("#data-status");
 const lastUpdated = document.querySelector("#last-updated");
@@ -460,6 +716,14 @@ function exportReport() {
     lastUpdated: timestamp.iso,
     selectedRange,
     comparisonView: activeComparisonView(),
+    currency: activeCurrency(),
+    fx: {
+      base: baseCurrency,
+      rate: activeFxRate() || 1,
+      date: fxState.date,
+      updatedAt: fxState.updatedAt,
+      source: fxState.source,
+    },
     rowCoverage: totals,
     summaryMetrics: reportData,
     selectedSourceRows: selectedRowsForExport(),

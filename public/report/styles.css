@@ -428,7 +428,9 @@ h1 {
 }
 
 .action-buttons button,
-.theme-switcher button {
+.theme-switcher button,
+.currency-switcher button,
+.currency-switcher select {
   border: 1px solid var(--black);
   background: var(--panel);
   color: var(--ink);
@@ -442,14 +444,54 @@ h1 {
 .action-buttons button:hover,
 .action-buttons button:focus-visible,
 .theme-switcher button:hover,
-.theme-switcher button:focus-visible {
+.theme-switcher button:focus-visible,
+.currency-switcher button:hover,
+.currency-switcher button:focus-visible {
   background: var(--black);
   color: var(--white);
 }
 
-.action-buttons button:disabled {
+.action-buttons button:disabled,
+.currency-switcher button:disabled {
   cursor: wait;
   opacity: .58;
+}
+
+.currency-switcher {
+  display: grid;
+  grid-template-columns: minmax(126px, 1fr) auto;
+  gap: 6px;
+  align-items: end;
+  justify-items: stretch;
+  width: min(320px, 100%);
+}
+
+.currency-switcher label {
+  display: grid;
+  gap: 4px;
+}
+
+.currency-switcher label span,
+#fx-status {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.currency-switcher select {
+  appearance: none;
+  min-height: 38px;
+  cursor: pointer;
+}
+
+#fx-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: right;
+  letter-spacing: .04em;
+  text-transform: none;
 }
 
 .theme-switcher {
@@ -1462,6 +1504,12 @@ td:nth-child(n+2), th:nth-child(n+2) {
   .theme-switcher {
     justify-self: start;
   }
+  .currency-switcher {
+    width: min(320px, 100%);
+  }
+  #fx-status {
+    text-align: left;
+  }
   .topbar, .hero, .two-col, .chart-grid, .finance-band { grid-template-columns: 1fr; }
   .graph-options {
     display: grid;
@@ -1528,6 +1576,9 @@ td:nth-child(n+2), th:nth-child(n+2) {
   .kpi-grid { grid-template-columns: 1fr; }
   .hero { padding: 24px; }
   .brand-lockup { flex-direction: column; }
+  .currency-switcher {
+    grid-template-columns: 1fr;
+  }
   .finance-grid { grid-template-columns: 1fr; }
   .panel { padding: 18px; }
   .tabs {

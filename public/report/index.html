@@ -65,6 +65,20 @@
               <button id="refresh-data" type="button">Refresh</button>
               <button id="export-report" type="button">Custom Export</button>
             </div>
+            <div class="currency-switcher" aria-label="Currency conversion">
+              <label for="currency-select">
+                <span>Currency</span>
+                <select id="currency-select">
+                  <option value="GBP">GBP</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="AUD">AUD</option>
+                  <option value="CAD">CAD</option>
+                </select>
+              </label>
+              <button id="refresh-fx" type="button">Update FX</button>
+              <p id="fx-status" aria-live="polite">FX: GBP base</p>
+            </div>
             <div class="theme-switcher" role="radiogroup" aria-label="Theme mode">
               <button type="button" role="radio" aria-checked="false" data-theme-mode="light">Light</button>
               <button type="button" role="radio" aria-checked="false" data-theme-mode="dark">Dark</button>
