@@ -39,6 +39,8 @@ export default function SignIn({ callbackUrl, error }) {
       <Head>
         <title>Sign in | AW3® Marketing Reporting</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
       </Head>
       <main className="signin-page">
         <div className="theme-switcher" role="radiogroup" aria-label="Theme mode">
