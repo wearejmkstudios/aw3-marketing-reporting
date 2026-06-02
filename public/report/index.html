@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AW3® Marketing Reporting</title>
+    <script>
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem("aw3-theme-mode") || "system";
+      } catch {
+        document.documentElement.dataset.theme = "system";
+      }
+    </script>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -57,6 +64,11 @@
             <div class="action-buttons">
               <button id="refresh-data" type="button">Refresh</button>
               <button id="export-report" type="button">Custom Export</button>
+            </div>
+            <div class="theme-switcher" role="radiogroup" aria-label="Theme mode">
+              <button type="button" role="radio" aria-checked="false" data-theme-mode="light">Light</button>
+              <button type="button" role="radio" aria-checked="false" data-theme-mode="dark">Dark</button>
+              <button type="button" role="radio" aria-checked="true" data-theme-mode="system">System</button>
             </div>
           </div>
         </div>

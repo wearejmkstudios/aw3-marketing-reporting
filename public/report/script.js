@@ -37,9 +37,41 @@ const loadingScreen = document.querySelector("#loading-screen");
 const pageShell = document.querySelector(".page-shell");
 const railToggle = document.querySelector("#rail-toggle");
 const railToggleText = railToggle?.querySelector(".rail-toggle-text");
+const themeButtons = document.querySelectorAll("[data-theme-mode]");
 const revealTargets = document.querySelectorAll(
   ".comparison-switcher, .hero, .kpi-grid, .finance-band, .two-col, .chart-grid, .ai-chat",
 );
+
+function storedThemeMode() {
+  try {
+    return localStorage.getItem("aw3-theme-mode") || "system";
+  } catch {
+    return "system";
+  }
+}
+
+function setThemeMode(mode, persist = true) {
+  const nextMode = ["light", "dark", "system"].includes(mode) ? mode : "system";
+  document.documentElement.dataset.theme = nextMode;
+  themeButtons.forEach((button) => {
+    const selected = button.dataset.themeMode === nextMode;
+    button.classList.toggle("is-active", selected);
+    button.setAttribute("aria-checked", String(selected));
+  });
+  if (persist) {
+    try {
+      localStorage.setItem("aw3-theme-mode", nextMode);
+    } catch {
+      // Local storage can be unavailable in strict browser contexts.
+    }
+  }
+}
+
+setThemeMode(storedThemeMode(), false);
+
+themeButtons.forEach((button) => {
+  button.addEventListener("click", () => setThemeMode(button.dataset.themeMode));
+});
 
 function setRailCollapsed(collapsed, persist = true) {
   document.body.classList.toggle("rail-collapsed", collapsed);
