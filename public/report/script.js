@@ -37,6 +37,7 @@ const loadingScreen = document.querySelector("#loading-screen");
 const pageShell = document.querySelector(".page-shell");
 const railToggle = document.querySelector("#rail-toggle");
 const railToggleText = railToggle?.querySelector(".rail-toggle-text");
+const mobileRailQuery = window.matchMedia("(max-width: 980px)");
 const themeButtons = document.querySelectorAll("[data-theme-mode]");
 const termButtons = document.querySelectorAll("[data-term-mode]");
 const outputModeButtons = document.querySelectorAll("[data-output-mode]");
@@ -172,13 +173,22 @@ function setRailCollapsed(collapsed, persist = true) {
 }
 
 try {
-  setRailCollapsed(localStorage.getItem("aw3-report-rail-collapsed") === "true", false);
+  setRailCollapsed(
+    mobileRailQuery.matches ? true : localStorage.getItem("aw3-report-rail-collapsed") === "true",
+    false,
+  );
 } catch {
-  setRailCollapsed(false, false);
+  setRailCollapsed(mobileRailQuery.matches, false);
 }
 
 railToggle?.addEventListener("click", () => {
   setRailCollapsed(!document.body.classList.contains("rail-collapsed"));
+});
+
+mobileRailQuery.addEventListener("change", (event) => {
+  if (event.matches) {
+    setRailCollapsed(true, false);
+  }
 });
 
 revealTargets.forEach((target) => target.classList.add("reveal"));
@@ -236,11 +246,22 @@ const note = document.querySelector("#comparison-note");
 const current = document.querySelector("#current-period");
 const periodA = document.querySelector("#period-a");
 const periodB = document.querySelector("#period-b");
+let activeViewKey = "mom";
+
+function activeComparisonView() {
+  return activeViewKey;
+}
+
+function comparisonFor(viewKey) {
+  return views[viewKey] || views.mom;
+}
 
 tabButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    const view = views[button.dataset.view];
+    const nextView = button.dataset.view;
     softPageTransition(() => {
+      activeViewKey = views[nextView] ? nextView : "mom";
+      const view = comparisonFor(activeViewKey);
       tabButtons.forEach((tab) => {
         const selected = tab === button;
         tab.classList.toggle("active", selected);
@@ -252,6 +273,8 @@ tabButtons.forEach((button) => {
       current.textContent = view.current;
       periodA.textContent = view.a;
       periodB.textContent = view.b;
+      alignRangeToComparisonView(activeViewKey);
+      updateRangeUi();
     });
   });
 });
@@ -857,8 +880,129 @@ function rangeLabel(range = selectedRangeState) {
   return `${start.shortLabel}-${end.shortLabel}`;
 }
 
+function shiftMonthKey(key, offset) {
+  const parts = monthFromKey(key);
+  const shiftedValue = parts.value + offset;
+  const year = Math.floor(shiftedValue / 12);
+  const monthIndex = shiftedValue - (year * 12);
+  return `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
+}
+
+function rangeMonthCount(range = selectedRangeState) {
+  return monthFromKey(range.end).value - monthFromKey(range.start).value + 1;
+}
+
+function shiftedRange(range, offset) {
+  return {
+    start: shiftMonthKey(range.start, offset),
+    end: shiftMonthKey(range.end, offset),
+  };
+}
+
+function fiscalQuarterInfo(key) {
+  const parts = monthFromKey(key);
+  const fiscalYear = Number(parts.year) - (parts.monthIndex < 3 ? 1 : 0);
+  const quarter = Math.floor(((parts.monthIndex - 3 + 12) % 12) / 3) + 1;
+  return { quarter, fiscalYear };
+}
+
+function fiscalQuarterStartKey(endKey) {
+  const { quarter, fiscalYear } = fiscalQuarterInfo(endKey);
+  const startMonthIndex = (3 + ((quarter - 1) * 3)) % 12;
+  const startYear = startMonthIndex >= 3 ? fiscalYear : fiscalYear + 1;
+  return `${startYear}-${String(startMonthIndex + 1).padStart(2, "0")}`;
+}
+
+function fiscalYearStartKey(endKey) {
+  const { fiscalYear } = fiscalQuarterInfo(endKey);
+  return `${fiscalYear}-04`;
+}
+
+function clampStartToAvailable(startKey, endKey) {
+  const keys = availableMonthKeys();
+  if (keys.includes(startKey)) return startKey;
+  return keys.find((key) => compareMonthKeys(key, startKey) >= 0 && compareMonthKeys(key, endKey) <= 0) || endKey;
+}
+
+function fiscalQuarterLabel(key) {
+  const { quarter, fiscalYear } = fiscalQuarterInfo(key);
+  return `Q${quarter} ${fiscalYear}`;
+}
+
+function fiscalQuarterRangeLabel(range = selectedRangeState) {
+  const startLabel = fiscalQuarterLabel(range.start);
+  const endLabel = fiscalQuarterLabel(range.end);
+  return startLabel === endLabel ? endLabel : `${startLabel}-${endLabel}`;
+}
+
+function rangeLabelForActiveView() {
+  if (activeViewKey === "fq") return fiscalQuarterRangeLabel();
+  if (activeViewKey === "yoy") return `${rangeLabel()} vs ${rangeLabel(shiftedRange(selectedRangeState, -12))}`;
+  if (activeViewKey === "fy") {
+    const { fiscalYear } = fiscalQuarterInfo(selectedRangeState.end);
+    return selectedRangeState.start === fiscalYearStartKey(selectedRangeState.end)
+      ? `FYTD ${fiscalYear}`
+      : `FY ${fiscalYear}: ${rangeLabel()}`;
+  }
+  return rangeLabel();
+}
+
+function comparisonPeriodLabels() {
+  const monthCount = rangeMonthCount();
+  const previousPeriod = shiftedRange(selectedRangeState, -monthCount);
+  const previousYear = shiftedRange(selectedRangeState, -12);
+  if (activeViewKey === "fq") {
+    return {
+      current: fiscalQuarterRangeLabel(),
+      a: `vs ${fiscalQuarterRangeLabel(shiftedRange(selectedRangeState, -3))}`,
+      b: `vs ${fiscalQuarterRangeLabel(previousYear)}`,
+    };
+  }
+  if (activeViewKey === "yoy") {
+    return {
+      current: rangeLabel(),
+      a: `vs ${rangeLabel(previousYear)}`,
+      b: `vs ${rangeLabel(previousPeriod)}`,
+    };
+  }
+  if (activeViewKey === "fy") {
+    const { fiscalYear } = fiscalQuarterInfo(selectedRangeState.end);
+    return {
+      current: selectedRangeState.start === fiscalYearStartKey(selectedRangeState.end)
+        ? `FYTD ${fiscalYear}`
+        : `FY ${fiscalYear}`,
+      a: "vs FY Target",
+      b: `vs FYTD ${fiscalYear - 1}`,
+    };
+  }
+  return {
+    current: rangeLabel(),
+    a: `vs ${rangeLabel(previousPeriod)}`,
+    b: `vs ${rangeLabel(previousYear)}`,
+  };
+}
+
+function syncComparisonPeriodLabels() {
+  const labels = comparisonPeriodLabels();
+  if (current) current.textContent = labels.current;
+  if (periodA) periodA.textContent = labels.a;
+  if (periodB) periodB.textContent = labels.b;
+}
+
+function alignRangeToComparisonView(viewKey) {
+  const end = selectedRangeState.end;
+  if (viewKey === "fq") {
+    selectedRangeState = sortRange(clampStartToAvailable(fiscalQuarterStartKey(end), end), end);
+    rangeAnchor = null;
+  }
+  if (viewKey === "fy") {
+    selectedRangeState = sortRange(clampStartToAvailable(fiscalYearStartKey(end), end), end);
+    rangeAnchor = null;
+  }
+}
+
 function updateRangeUi() {
-  const label = rangeLabel();
+  const label = rangeLabelForActiveView();
   selectedRange = label;
   if (dateLabel) dateLabel.textContent = label;
   if (rangeStartLabel) rangeStartLabel.textContent = monthFromKey(selectedRangeState.start).label;
@@ -868,6 +1012,7 @@ function updateRangeUi() {
       ? `Start set: ${monthFromKey(rangeAnchor).label}. Choose an end month.`
       : `Selected: ${label}`;
   }
+  syncComparisonPeriodLabels();
   monthGrid?.querySelectorAll("[data-month-key]").forEach((button) => {
     const key = button.dataset.monthKey;
     const value = monthFromKey(key).value;
@@ -937,8 +1082,7 @@ presetButtons.forEach((button) => {
     const endParts = monthFromKey(end);
     let start = end;
     if (button.dataset.preset === "quarter") {
-      const quarterStartIndex = Math.floor(endParts.monthIndex / 3) * 3;
-      const candidate = `${endParts.year}-${String(quarterStartIndex + 1).padStart(2, "0")}`;
+      const candidate = fiscalQuarterStartKey(end);
       start = keys.includes(candidate) ? candidate : keys.find((key) => compareMonthKeys(key, candidate) >= 0) || end;
     }
     if (button.dataset.preset === "year") {
@@ -988,11 +1132,6 @@ function selectedRowsForExport() {
     marketing: collectRows(extractedData.marketing),
     financial: collectRows(extractedData.financial),
   };
-}
-
-function activeComparisonView() {
-  const active = document.querySelector(".tabs button.active");
-  return active?.dataset.view || "mom";
 }
 
 function downloadJson(fileName, payload) {
