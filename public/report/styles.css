@@ -216,27 +216,39 @@ body.rail-collapsed .rail-toggle-text {
 }
 
 .rail nav {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: repeat(6, minmax(56px, 1fr));
+  align-items: center;
+  justify-items: center;
+  gap: 4px;
+  overflow: hidden;
   transition: opacity .18s ease, transform .24s ease;
 }
 
 body.rail-collapsed .rail nav {
   opacity: 0;
   pointer-events: none;
-  transform: rotate(180deg) translateY(8px);
+  transform: translateY(8px);
 }
 
 .rail a {
+  width: 92px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #d8d8d8;
   text-decoration: none;
   font-size: 11px;
   letter-spacing: .08em;
   text-transform: uppercase;
   font-weight: 750;
+  white-space: nowrap;
+  transform: rotate(90deg);
+  transform-origin: center;
 }
 
 .report {
@@ -1060,10 +1072,16 @@ td:nth-child(n+2), th:nth-child(n+2) {
     margin: 0 14px 0 auto;
   }
   .rail nav {
+    display: flex;
     writing-mode: initial;
     transform: none;
     flex-direction: row;
     overflow-x: auto;
+  }
+  .rail a {
+    width: auto;
+    height: auto;
+    transform: none;
   }
   body.rail-collapsed .rail nav {
     opacity: 1;
