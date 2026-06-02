@@ -39,7 +39,7 @@ const railToggle = document.querySelector("#rail-toggle");
 const railToggleText = railToggle?.querySelector(".rail-toggle-text");
 const themeButtons = document.querySelectorAll("[data-theme-mode]");
 const revealTargets = document.querySelectorAll(
-  ".comparison-switcher, .hero, .kpi-grid, .finance-band, .two-col, .chart-grid, .ai-chat",
+  ".comparison-switcher, .hero, .kpi-grid, .finance-band, .two-col, .graph-options, .chart-grid, .ai-chat",
 );
 
 function storedThemeMode() {
@@ -172,6 +172,54 @@ tabButtons.forEach((button) => {
     });
   });
 });
+
+const graphGrid = document.querySelector("#chart-grid");
+const graphNote = document.querySelector("#graph-note");
+const graphFilterButtons = document.querySelectorAll("[data-graph-filter]");
+const graphDensityButtons = document.querySelectorAll("[data-graph-density]");
+const chartCards = document.querySelectorAll("[data-graph-group]");
+const graphNotes = {
+  all: "Showing all chart views with hover annotations for values, changes, and data-quality notes.",
+  efficiency: "Emphasising efficiency charts: spend, lead volume, and channel-mix quality checks.",
+  revenue: "Emphasising finance cross-checks: revenue, deal value, and year-on-year benchmark movement.",
+  funnel: "Emphasising funnel conversion: leads, opportunities, closed-won deals, and conversion pressure points.",
+};
+
+function setGraphFilter(filter) {
+  const nextFilter = graphNotes[filter] ? filter : "all";
+  graphFilterButtons.forEach((button) => {
+    const selected = button.dataset.graphFilter === nextFilter;
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-selected", String(selected));
+  });
+  chartCards.forEach((card) => {
+    const selected = nextFilter === "all" || card.dataset.graphGroup === nextFilter;
+    card.classList.toggle("is-active-graph", selected);
+  });
+  graphGrid?.classList.toggle("is-filtered", nextFilter !== "all");
+  if (graphNote) graphNote.textContent = graphNotes[nextFilter];
+}
+
+function setGraphDensity(density) {
+  const nextDensity = density === "compact" ? "compact" : "full";
+  graphGrid?.setAttribute("data-graph-density", nextDensity);
+  graphDensityButtons.forEach((button) => {
+    const selected = button.dataset.graphDensity === nextDensity;
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-checked", String(selected));
+  });
+}
+
+graphFilterButtons.forEach((button) => {
+  button.addEventListener("click", () => setGraphFilter(button.dataset.graphFilter));
+});
+
+graphDensityButtons.forEach((button) => {
+  button.addEventListener("click", () => setGraphDensity(button.dataset.graphDensity));
+});
+
+setGraphFilter("all");
+setGraphDensity("full");
 
 const reportData = {
   month: "May 2026",

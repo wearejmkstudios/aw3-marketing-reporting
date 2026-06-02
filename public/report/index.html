@@ -192,23 +192,45 @@
         </aside>
       </section>
 
-      <section class="chart-grid">
-        <article class="panel chart-card">
+      <section class="graph-options panel" aria-label="Graph options">
+        <div>
+          <p class="label">Graph Options</p>
+          <h3>Choose the story the charts should emphasise</h3>
+          <p id="graph-note">Showing all chart views with hover annotations for values, changes, and data-quality notes.</p>
+        </div>
+        <div class="graph-control-stack">
+          <div class="graph-tabs" role="tablist" aria-label="Graph focus">
+            <button class="active" type="button" role="tab" aria-selected="true" data-graph-filter="all">All</button>
+            <button type="button" role="tab" aria-selected="false" data-graph-filter="efficiency">Efficiency</button>
+            <button type="button" role="tab" aria-selected="false" data-graph-filter="revenue">Revenue</button>
+            <button type="button" role="tab" aria-selected="false" data-graph-filter="funnel">Funnel</button>
+          </div>
+          <div class="graph-tabs graph-density" role="radiogroup" aria-label="Graph density">
+            <button class="active" type="button" role="radio" aria-checked="true" data-graph-density="full">Full</button>
+            <button type="button" role="radio" aria-checked="false" data-graph-density="compact">Compact</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="chart-grid" id="chart-grid" data-graph-density="full">
+        <article class="panel chart-card" data-graph-group="efficiency">
           <p class="label">Spend vs Leads</p>
           <h3>Efficiency improved in May</h3>
           <div class="bars">
-            <div style="--w: 100%; --c: #2563eb"><span>Apr spend</span><b>GBP 63,905</b></div>
-            <div style="--w: 66%; --c: #2563eb"><span>May spend</span><b>GBP 41,959</b></div>
-            <div style="--w: 71%; --c: #13a538"><span>Apr leads</span><b>586</b></div>
-            <div style="--w: 100%; --c: #13a538"><span>May leads</span><b>822</b></div>
+            <div tabindex="0" data-annotation="April spend baseline before the May efficiency rebound." style="--w: 100%; --c: #2563eb"><span>Apr spend</span><b>GBP 63,905</b></div>
+            <div tabindex="0" data-annotation="May spend fell 34.3% MoM while lead volume increased." style="--w: 66%; --c: #2563eb"><span>May spend</span><b>GBP 41,959</b></div>
+            <div tabindex="0" data-annotation="April lead volume: 586 leads." style="--w: 71%; --c: #13a538"><span>Apr leads</span><b>586</b></div>
+            <div tabindex="0" data-annotation="May leads rose 40.3% MoM to 822." style="--w: 100%; --c: #13a538"><span>May leads</span><b>822</b></div>
           </div>
         </article>
 
-        <article id="channels" class="panel chart-card">
+        <article id="channels" class="panel chart-card" data-graph-group="efficiency">
           <p class="label">Channel Mix</p>
           <h3>Tracked May spend is all Meta</h3>
           <div class="donut-wrap">
-            <div class="donut" aria-label="100 percent Meta spend"></div>
+            <div class="donut" tabindex="0" aria-label="100 percent Meta spend">
+              <span class="chart-annotation">Data-quality flag: tracked May spend currently shows 100% Meta and GBP 0 Google.</span>
+            </div>
             <div>
               <p><strong>Meta:</strong> GBP 41,959</p>
               <p><strong>Google:</strong> GBP 0</p>
@@ -217,23 +239,23 @@
           </div>
         </article>
 
-        <article class="panel chart-card finance-card">
+        <article class="panel chart-card finance-card" data-graph-group="revenue">
           <p class="label">Revenue Cross-Check</p>
           <h3>Revenue lifted MoM but missed the annual benchmark</h3>
           <div class="bars">
-            <div style="--w: 39%; --c: #06b6d4"><span>Apr revenue</span><b>GBP 80,234</b></div>
-            <div style="--w: 72%; --c: #06b6d4"><span>May revenue</span><b>GBP 148,296</b></div>
-            <div style="--w: 100%; --c: #f59e0b"><span>May 2025 revenue</span><b>GBP 206,803</b></div>
-            <div style="--w: 58%; --c: #111111"><span>Deal value</span><b>GBP 120,675</b></div>
+            <div tabindex="0" data-annotation="April revenue from finance report." style="--w: 39%; --c: #06b6d4"><span>Apr revenue</span><b>GBP 80,234</b></div>
+            <div tabindex="0" data-annotation="May revenue increased 84.8% MoM." style="--w: 72%; --c: #06b6d4"><span>May revenue</span><b>GBP 148,296</b></div>
+            <div tabindex="0" data-annotation="May 2025 revenue was GBP 58,507 higher than May 2026." style="--w: 100%; --c: #f59e0b"><span>May 2025 revenue</span><b>GBP 206,803</b></div>
+            <div tabindex="0" data-annotation="Tracked marketing deal value equals 81.4% of May revenue." style="--w: 58%; --c: #111111"><span>Deal value</span><b>GBP 120,675</b></div>
           </div>
         </article>
 
-        <article id="funnel" class="panel chart-card funnel">
+        <article id="funnel" class="panel chart-card funnel" data-graph-group="funnel">
           <p class="label">Funnel Conversion</p>
           <h3>Volume moved; conversion needs scrutiny</h3>
-          <div class="funnel-row"><span>Leads</span><div><i style="width: 100%"></i></div><b>822</b></div>
-          <div class="funnel-row"><span>Opptys</span><div><i style="width: 7.54%; background:#f59e0b"></i></div><b>62</b></div>
-          <div class="funnel-row"><span>Won</span><div><i style="width: 1.22%; background:#13a538"></i></div><b>10</b></div>
+          <div class="funnel-row"><span>Leads</span><div tabindex="0" data-annotation="822 leads captured in May, up 40.3% MoM."><i style="width: 100%"></i></div><b>822</b></div>
+          <div class="funnel-row"><span>Opptys</span><div tabindex="0" data-annotation="62 opportunities created; lead-to-opportunity conversion is 7.54%."><i style="width: 7.54%; background:#f59e0b"></i></div><b>62</b></div>
+          <div class="funnel-row"><span>Won</span><div tabindex="0" data-annotation="10 closed-won deals; opportunity-to-won conversion is 16.13%."><i style="width: 1.22%; background:#13a538"></i></div><b>10</b></div>
           <div class="conversion-pair">
             <strong>Lead to oppty: 7.54%</strong>
             <strong>Oppty to won: 16.13%</strong>

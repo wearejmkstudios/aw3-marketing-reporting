@@ -55,7 +55,10 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
 body {
   margin: 0;
   min-height: 100vh;
@@ -64,6 +67,7 @@ body {
   background: var(--page);
   background-color: var(--page);
   color: var(--ink);
+  overflow-x: hidden;
   transition: grid-template-columns .24s ease, background-color .2s ease, color .2s ease;
 }
 
@@ -835,11 +839,111 @@ h1 {
   gap: 22px;
 }
 
+.graph-options {
+  margin-top: 22px;
+  display: flex;
+  justify-content: space-between;
+  gap: 22px;
+  align-items: end;
+  min-width: 0;
+}
+
+.graph-options h3 {
+  margin-bottom: 8px;
+}
+
+.graph-options p:not(.label) {
+  margin: 0;
+  max-width: 680px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.graph-control-stack {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.graph-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--black);
+  max-width: 100%;
+}
+
+.graph-tabs button {
+  border: 0;
+  background: transparent;
+  color: #d7d7d7;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.graph-tabs button.active,
+.graph-tabs button[aria-selected="true"],
+.graph-tabs button[aria-checked="true"] {
+  background: var(--panel);
+  color: var(--ink);
+}
+
 .chart-grid {
   margin-top: 22px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
+}
+
+.chart-grid.is-filtered .chart-card:not(.is-active-graph) {
+  opacity: .34;
+  filter: grayscale(.65);
+}
+
+.chart-grid.is-filtered .chart-card.is-active-graph {
+  border-color: var(--ink);
+  box-shadow: var(--hover-shadow);
+}
+
+.chart-grid[data-graph-density="compact"] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.chart-grid[data-graph-density="compact"] .chart-card {
+  padding: 18px;
+}
+
+.chart-grid[data-graph-density="compact"] .chart-card h3 {
+  font-size: 19px;
+}
+
+.chart-grid[data-graph-density="compact"] .bars {
+  gap: 11px;
+}
+
+.chart-grid[data-graph-density="compact"] .bars div {
+  height: 34px;
+}
+
+.chart-grid[data-graph-density="compact"] .donut-wrap {
+  grid-template-columns: 116px 1fr;
+  gap: 14px;
+}
+
+.chart-grid[data-graph-density="compact"] .donut {
+  width: 112px;
+  height: 112px;
+}
+
+.chart-grid[data-graph-density="compact"] .donut::after {
+  inset: 18px;
+  font-size: 22px;
 }
 
 .panel {
@@ -934,6 +1038,7 @@ td:nth-child(n+2), th:nth-child(n+2) {
   height: 42px;
   background: var(--bar-bg);
   transition: transform .16s ease, filter .16s ease;
+  outline: 0;
 }
 
 .chart-card:hover .bars div,
@@ -942,9 +1047,76 @@ td:nth-child(n+2), th:nth-child(n+2) {
 }
 
 .bars div:hover,
-.funnel-row div:hover {
+.bars div:focus-visible,
+.funnel-row div:hover,
+.funnel-row div:focus-visible {
   transform: scaleX(1.01);
   transform-origin: left center;
+}
+
+.bars [data-annotation],
+.funnel-row [data-annotation],
+.donut {
+  cursor: help;
+}
+
+.bars [data-annotation]::after,
+.funnel-row [data-annotation]::after {
+  content: attr(data-annotation);
+  position: absolute;
+  left: 14px;
+  bottom: calc(100% + 10px);
+  z-index: 30;
+  width: min(280px, calc(100vw - 80px));
+  border: 1px solid var(--ink);
+  background: var(--panel);
+  color: var(--ink);
+  padding: 10px 11px;
+  box-shadow: var(--hover-shadow);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(5px);
+  transition: opacity .16s ease, transform .16s ease;
+}
+
+.bars [data-annotation]::before,
+.funnel-row [data-annotation]::before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  bottom: calc(100% + 3px);
+  z-index: 31;
+  width: 12px;
+  height: 12px;
+  border-right: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  background: var(--panel);
+  opacity: 0;
+  pointer-events: none;
+  transform: rotate(45deg) translateY(5px);
+  transition: opacity .16s ease, transform .16s ease;
+}
+
+.bars [data-annotation]:hover::after,
+.bars [data-annotation]:focus-visible::after,
+.funnel-row [data-annotation]:hover::after,
+.funnel-row [data-annotation]:focus-visible::after,
+.bars [data-annotation]:hover::before,
+.bars [data-annotation]:focus-visible::before,
+.funnel-row [data-annotation]:hover::before,
+.funnel-row [data-annotation]:focus-visible::before {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.bars [data-annotation]:hover::before,
+.bars [data-annotation]:focus-visible::before,
+.funnel-row [data-annotation]:hover::before,
+.funnel-row [data-annotation]:focus-visible::before {
+  transform: rotate(45deg) translateY(0);
 }
 
 .bars div::before {
@@ -977,6 +1149,7 @@ td:nth-child(n+2), th:nth-child(n+2) {
   border-radius: 999px;
   background: conic-gradient(var(--blue) 0deg 360deg);
   position: relative;
+  outline: 0;
 }
 
 .donut::after {
@@ -989,6 +1162,32 @@ td:nth-child(n+2), th:nth-child(n+2) {
   place-items: center;
   font-size: 28px;
   font-weight: 900;
+}
+
+.chart-annotation {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  z-index: 30;
+  width: min(280px, calc(100vw - 80px));
+  border: 1px solid var(--ink);
+  background: var(--panel);
+  color: var(--ink);
+  padding: 10px 11px;
+  box-shadow: var(--hover-shadow);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(5px);
+  transition: opacity .16s ease, transform .16s ease;
+}
+
+.donut:hover .chart-annotation,
+.donut:focus-visible .chart-annotation {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .funnel-row {
@@ -1005,6 +1204,8 @@ td:nth-child(n+2), th:nth-child(n+2) {
   height: 34px;
   background: var(--bar-bg);
   transition: transform .16s ease, filter .16s ease;
+  position: relative;
+  outline: 0;
 }
 
 .funnel-row i {
@@ -1198,7 +1399,9 @@ td:nth-child(n+2), th:nth-child(n+2) {
     width: auto;
     height: 82px;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 12px;
+    overflow: hidden;
   }
   body.rail-collapsed .rail {
     width: auto;
@@ -1211,16 +1414,25 @@ td:nth-child(n+2), th:nth-child(n+2) {
   .rail-toggle {
     width: 46px;
     min-height: 40px;
-    margin: 0 14px 0 auto;
+    flex: 0 0 46px;
+    margin: 0;
   }
   .rail nav {
     display: flex;
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    max-width: calc(100vw - 168px);
     writing-mode: initial;
     transform: none;
     flex-direction: row;
+    overflow: hidden;
     overflow-x: auto;
+    overflow-y: hidden;
+    contain: paint;
   }
   .rail a {
+    flex: 0 0 auto;
     width: auto;
     height: auto;
     transform: none;
@@ -1251,6 +1463,24 @@ td:nth-child(n+2), th:nth-child(n+2) {
     justify-self: start;
   }
   .topbar, .hero, .two-col, .chart-grid, .finance-band { grid-template-columns: 1fr; }
+  .graph-options {
+    display: grid;
+    align-items: start;
+  }
+  .graph-control-stack {
+    justify-items: stretch;
+    width: 100%;
+  }
+  .graph-tabs {
+    overflow-x: auto;
+    max-width: calc(100vw - 44px);
+  }
+  .graph-tabs button {
+    white-space: nowrap;
+  }
+  .chart-grid[data-graph-density="compact"] {
+    grid-template-columns: 1fr;
+  }
   .comparison-switcher {
     display: grid;
     align-items: start;
