@@ -54,9 +54,9 @@
         <div class="brand-stack">
           <div class="brand-lockup">
             <img src="./assets/aw3-doge-logo.png" alt="D.O.G.E. department logo" />
-            <div class="toggle" aria-label="Output mode">
-              <button class="active">Web</button>
-              <button>Slides</button>
+            <div class="toggle" role="tablist" aria-label="Output mode">
+              <button class="active" type="button" role="tab" aria-selected="true" data-output-mode="web">Web</button>
+              <button type="button" role="tab" aria-selected="false" data-output-mode="slides">Slides</button>
             </div>
           </div>
           <div class="report-actions" aria-label="Report actions">
@@ -87,6 +87,101 @@
           </div>
         </div>
       </header>
+
+      <section id="slides-output" class="slides-deck" aria-label="Slide deck output" hidden>
+        <div class="slides-toolbar panel">
+          <div>
+            <p class="label">Slides Output</p>
+            <h2>Board-ready monthly marketing report</h2>
+            <p>Five concise slides using the same live currency, comparison, and financial cross-reference data as the web report.</p>
+          </div>
+          <div class="slide-actions">
+            <div class="slide-count" aria-live="polite">
+              <span>Slide</span>
+              <strong id="slide-counter">1 / 5</strong>
+            </div>
+            <button id="prev-slide" type="button">Previous</button>
+            <button id="next-slide" type="button">Next</button>
+            <button id="print-slides" type="button">Print / PDF</button>
+          </div>
+        </div>
+
+        <div class="slide-frame" tabindex="0">
+          <article class="slide is-active" data-slide="1">
+            <div class="slide-kicker">
+              <span>AW3® Marketing Reporting</span>
+              <span>May 2026</span>
+            </div>
+            <h2>Efficiency rebounded sharply, but deal quality still needs pressure.</h2>
+            <div class="slide-hero-grid">
+              <div><span>MER</span><strong>2.88</strong><em>+203.2% vs April</em></div>
+              <div><span>Revenue</span><strong>GBP 148,296</strong><em>+84.8% MoM</em></div>
+              <div><span>Total Spend</span><strong>GBP 41,959</strong><em>-34.3% MoM</em></div>
+            </div>
+          </article>
+
+          <article class="slide" data-slide="2">
+            <div class="slide-kicker">
+              <span>Scorecard</span>
+              <span>Marketing KPIs</span>
+            </div>
+            <h2>More demand was created with materially less media spend.</h2>
+            <div class="slide-metric-grid">
+              <div><span>Leads</span><strong>822</strong><em class="good">+40.3% MoM</em></div>
+              <div><span>New Opptys</span><strong>62</strong><em class="good">+67.6% MoM</em></div>
+              <div><span>Deals Won</span><strong>10</strong><em class="good">+150.0% MoM</em></div>
+              <div><span>AOV</span><strong>GBP 12,068</strong><em class="bad">-20.2% MoM</em></div>
+            </div>
+          </article>
+
+          <article class="slide" data-slide="3">
+            <div class="slide-kicker">
+              <span>Finance Cross-Check</span>
+              <span>Revenue Quality</span>
+            </div>
+            <h2>Revenue recovered month on month, but remains behind target and last year.</h2>
+            <div class="slide-split">
+              <div>
+                <p>Total revenue reached <strong>GBP 148,296</strong>, up 84.8% MoM.</p>
+                <p>Marketing deal value was <strong>GBP 120,675</strong>, equal to 81.4% of finance revenue.</p>
+              </div>
+              <div class="slide-callout">
+                <span>Target gap</span>
+                <strong>GBP 181,582</strong>
+                <em>-55.1% vs target</em>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide" data-slide="4">
+            <div class="slide-kicker">
+              <span>Funnel</span>
+              <span>Conversion Pressure</span>
+            </div>
+            <h2>Top-of-funnel volume moved; conversion quality is the next lever.</h2>
+            <div class="slide-funnel">
+              <div><span>Leads</span><strong>822</strong><i style="width:100%"></i></div>
+              <div><span>Opptys</span><strong>62</strong><i style="width:32%"></i></div>
+              <div><span>Won</span><strong>10</strong><i style="width:16%"></i></div>
+            </div>
+            <p class="slide-note">Lead to oppty: 7.54% · Oppty to won: 16.13%</p>
+          </article>
+
+          <article class="slide" data-slide="5">
+            <div class="slide-kicker">
+              <span>Insights & Next Steps</span>
+              <span>D.O.G.E.</span>
+            </div>
+            <h2>Prioritise data quality, lower CPL protection, and deal-value recovery.</h2>
+            <ol class="slide-actions-list">
+              <li><strong>Audit Google Ads data.</strong><span>May shows GBP 0 spend; confirm pause versus tracking gap.</span></li>
+              <li><strong>Protect the lower CPL.</strong><span>Identify the Meta campaigns behind the improved efficiency.</span></li>
+              <li><strong>Raise deal quality.</strong><span>Improve qualification and handoff to recover AOV.</span></li>
+              <li><strong>Reconcile finance and pipeline.</strong><span>Validate Salesforce timing against recognised revenue.</span></li>
+            </ol>
+          </article>
+        </div>
+      </section>
 
       <section class="comparison-switcher" aria-label="Comparison period switcher">
         <div>
