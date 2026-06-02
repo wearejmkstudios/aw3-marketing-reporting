@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AW3® Marketing Reporting</title>
+    <title>AW3® | RevOps Dashboard | Powered by D.O.G.E.</title>
     <script>
       try {
         document.documentElement.dataset.theme = localStorage.getItem("aw3-theme-mode") || "system";
@@ -36,6 +36,7 @@
         <a href="#comparisons">Comparisons</a>
         <a href="#channels">Channels</a>
         <a href="#funnel">Funnel</a>
+        <a href="#benchmarks">Benchmarks</a>
         <a href="#data-chat">AI Chat</a>
         <a href="#actions">Actions</a>
       </nav>
@@ -45,7 +46,7 @@
       <header class="topbar">
         <div>
           <p class="department">Department of Growth Efficiency</p>
-          <h1>AW3® Marketing Reporting</h1>
+          <h1>AW3® | RevOps Dashboard | Powered by D.O.G.E.</h1>
           <div class="meta-row">
             <span>Compared with April 2026</span>
             <span>Compared with May 2025</span>
@@ -71,15 +72,20 @@
               <label for="currency-select">
                 <span>Currency</span>
                 <select id="currency-select">
-                  <option value="GBP">GBP</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="AUD">AUD</option>
-                  <option value="CAD">CAD</option>
+                  <option value="GBP">£ GBP</option>
+                  <option value="USD">$ USD</option>
+                  <option value="EUR">€ EUR</option>
+                  <option value="AUD">A$ AUD</option>
+                  <option value="CAD">C$ CAD</option>
                 </select>
               </label>
               <button id="refresh-fx" type="button">Update FX</button>
               <p id="fx-status" aria-live="polite">FX: GBP base</p>
+            </div>
+            <div class="term-switcher" role="radiogroup" aria-label="Metric label style">
+              <span>Labels</span>
+              <button class="is-active" type="button" role="radio" aria-checked="true" data-term-mode="short">Short</button>
+              <button type="button" role="radio" aria-checked="false" data-term-mode="full">Full words</button>
             </div>
             <div class="theme-switcher" role="radiogroup" aria-label="Theme mode">
               <button type="button" role="radio" aria-checked="false" data-theme-mode="light">Light</button>
@@ -111,7 +117,7 @@
         <div class="slide-frame" tabindex="0">
           <article class="slide is-active" data-slide="1">
             <div class="slide-kicker">
-              <span>AW3® Marketing Reporting</span>
+              <span>AW3® | RevOps Dashboard | Powered by D.O.G.E.</span>
               <span>May 2026</span>
             </div>
             <h2>Efficiency rebounded sharply, but deal quality still needs pressure.</h2>
@@ -199,9 +205,13 @@
             </button>
             <div id="date-popover" class="date-popover" hidden>
               <div class="preset-row" aria-label="Date range presets">
-                <button type="button" data-preset="last-month">Last Month</button>
-                <button type="button" data-preset="quarter">This FQ</button>
-                <button type="button" data-preset="year">FYTD</button>
+                <button type="button" data-preset="last-month">Latest Month</button>
+                <button type="button" data-preset="quarter">Quarter to Date</button>
+                <button type="button" data-preset="year">Year to Date</button>
+              </div>
+              <div class="range-summary" aria-live="polite">
+                <span>Start <strong id="range-start-label">May 2026</strong></span>
+                <span>End <strong id="range-end-label">May 2026</strong></span>
               </div>
               <label class="year-picker-label" for="year-picker">Financial year</label>
               <select id="year-picker" class="year-picker"></select>
@@ -374,18 +384,54 @@
         </article>
       </section>
 
+      <section id="benchmarks" class="benchmark-panel panel" aria-label="B2B benchmark comparison">
+        <div>
+          <p class="label">B2B Benchmarks</p>
+          <h3>Compare the report against credible external reference points</h3>
+          <p>These benchmarks are directional context, not targets. D.O.G.E. uses them to flag where AW3® is ahead, behind, or missing source data.</p>
+        </div>
+        <div class="benchmark-grid">
+          <article>
+            <span>Sales benchmark</span>
+            <strong>91%</strong>
+            <p>Sales teams report win rates are stable or improving.</p>
+            <a href="https://blog.hubspot.com/sales/hubspot-sales-strategy-report" target="_blank" rel="noreferrer">HubSpot 2025</a>
+          </article>
+          <article>
+            <span>Deal-size benchmark</span>
+            <strong>93%</strong>
+            <p>Teams say average deal sizes are holding steady or growing.</p>
+            <a href="https://blog.hubspot.com/sales/hubspot-sales-strategy-report" target="_blank" rel="noreferrer">HubSpot 2025</a>
+          </article>
+          <article>
+            <span>MQL definition shift</span>
+            <strong>30%</strong>
+            <p>Companies define MQLs as leads expressing high-intent interest.</p>
+            <a href="https://8560290.fs1.hubspotusercontent-na1.net/hubfs/8560290/PDFs/Norwest-2025-B2B-Benchmark-Report.pdf" target="_blank" rel="noreferrer">Norwest 2025</a>
+          </article>
+          <article>
+            <span>B2B channel mix</span>
+            <strong>75%</strong>
+            <p>B2B marketers cite social media among top content channels.</p>
+            <a href="https://business.linkedin.com/advertise/resources/b2b-benchmark/2024" target="_blank" rel="noreferrer">LinkedIn 2024</a>
+          </article>
+        </div>
+      </section>
+
       <section id="data-chat" class="ai-chat panel" aria-label="AI data chat">
         <div class="chat-intro">
           <p class="label">Ask D.O.G.E. AI</p>
           <h3>Chat with the report data</h3>
           <p>
             Ask about spend, revenue, conversion, ROAS, MER, finance reconciliation,
-            or next actions. This prototype uses the loaded May 2026 data locally.
+            B2B benchmarks, or next actions. D.O.G.E. compares the selected range with loaded report data and external benchmark context.
           </p>
           <div class="prompt-chips" aria-label="Suggested prompts">
             <button type="button" data-prompt="What are the biggest risks this month?">Biggest risks</button>
             <button type="button" data-prompt="Why did MER improve?">Why MER improved</button>
             <button type="button" data-prompt="How does marketing compare to finance revenue?">Marketing vs finance</button>
+            <button type="button" data-prompt="Benchmark our B2B performance.">B2B benchmark</button>
+            <button type="button" data-prompt="Give me a deeper funnel diagnosis.">Funnel diagnosis</button>
             <button type="button" data-prompt="What should we do next?">Next steps</button>
           </div>
         </div>

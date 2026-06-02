@@ -38,6 +38,7 @@ const pageShell = document.querySelector(".page-shell");
 const railToggle = document.querySelector("#rail-toggle");
 const railToggleText = railToggle?.querySelector(".rail-toggle-text");
 const themeButtons = document.querySelectorAll("[data-theme-mode]");
+const termButtons = document.querySelectorAll("[data-term-mode]");
 const outputModeButtons = document.querySelectorAll("[data-output-mode]");
 const slidesOutput = document.querySelector("#slides-output");
 const slideFrame = document.querySelector(".slide-frame");
@@ -47,7 +48,7 @@ const prevSlideButton = document.querySelector("#prev-slide");
 const nextSlideButton = document.querySelector("#next-slide");
 const printSlidesButton = document.querySelector("#print-slides");
 const revealTargets = document.querySelectorAll(
-  ".comparison-switcher, .hero, .kpi-grid, .finance-band, .two-col, .graph-options, .chart-grid, .ai-chat, .slides-deck",
+  ".comparison-switcher, .hero, .kpi-grid, .finance-band, .two-col, .graph-options, .chart-grid, .benchmark-panel, .ai-chat, .slides-deck",
 );
 
 function storedThemeMode() {
@@ -341,11 +342,20 @@ const supportedCurrencies = {
   AUD: { name: "Australian Dollar" },
   CAD: { name: "Canadian Dollar" },
 };
+const currencySymbols = {
+  GBP: "£",
+  USD: "$",
+  EUR: "€",
+  AUD: "A$",
+  CAD: "C$",
+};
 const baseCurrency = "GBP";
 const fxStorageKey = "aw3-report-fx";
 const currencyStorageKey = "aw3-report-currency";
 const fxTextNodes = [];
 const fxAttributeTemplates = [];
+let termMode = "short";
+let termsReady = false;
 let fxState = {
   currency: storedCurrency(),
   rates: { GBP: 1 },
@@ -420,12 +430,10 @@ function formatMoneyFromGbp(amountGbp, currency = activeCurrency()) {
   const rate = activeFxRate(currency);
   const targetCurrency = rate ? currency : baseCurrency;
   const amount = amountGbp * (rate || 1);
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: targetCurrency,
-    currencyDisplay: "code",
+  const formatted = new Intl.NumberFormat("en-GB", {
     maximumFractionDigits: 0,
   }).format(amount).replace(/\u00a0/g, " ");
+  return `${currencySymbols[targetCurrency] || `${targetCurrency} `}${formatted}`;
 }
 
 function convertMoneyTemplate(template) {
@@ -481,12 +489,12 @@ function rateLabel() {
   const currency = activeCurrency();
   if (fxState.loading) return "FX: updating live rates...";
   if (currency === baseCurrency) {
-    return fxState.date ? `FX: GBP base · latest ${fxState.date}` : "FX: GBP base";
+    return fxState.date ? `FX: £ base · latest ${fxState.date}` : "FX: £ base";
   }
   const rate = activeFxRate(currency);
   if (!rate) return "FX unavailable; showing GBP";
   const date = fxState.date ? ` · latest ${fxState.date}` : "";
-  return `FX: 1 GBP = ${rate.toFixed(4)} ${currency}${date}`;
+  return `FX: £1 = ${currencySymbols[currency] || currency}${rate.toFixed(4)} ${currency}${date}`;
 }
 
 function updateCurrencyControls() {
@@ -503,6 +511,7 @@ function renderCurrency() {
   });
   syncReportDataMoney();
   updateCurrencyControls();
+  if (termsReady) renderTerms();
 }
 
 async function refreshFxRates({ force = false } = {}) {
@@ -579,6 +588,114 @@ currencySelect?.addEventListener("change", async () => {
 
 refreshFxButton?.addEventListener("click", () => refreshFxRates({ force: true }));
 window.setTimeout(() => refreshFxRates(), 0);
+
+const termStorageKey = "aw3-term-mode";
+const termTextNodes = [];
+const termAttributeTemplates = [];
+const termExpansions = [
+  { short: "FYTD", full: "financial year to date" },
+  { short: "YoY", full: "year over year" },
+  { short: "MoM", full: "month over month" },
+  { short: "ROAS", full: "return on ad spend" },
+  { short: "MER", full: "marketing efficiency ratio" },
+  { short: "AOV", full: "average order value" },
+  { short: "Opptys", full: "Opportunities" },
+  { short: "FQ", full: "financial quarter" },
+  { short: "MQL", full: "marketing qualified lead" },
+];
+termMode = storedTermMode();
+
+function storedTermMode() {
+  try {
+    const mode = localStorage.getItem(termStorageKey);
+    return mode === "full" ? "full" : "short";
+  } catch {
+    return "short";
+  }
+}
+
+function expandTerms(text) {
+  return termExpansions.reduce((value, term) => (
+    value.replace(new RegExp(`\\b${term.short}\\b`, "g"), term.full)
+  ), text);
+}
+
+function registerTermTemplates() {
+  const root = document.querySelector(".report");
+  if (!root) return;
+  const termPattern = new RegExp(termExpansions.map((term) => `\\b${term.short}\\b`).join("|"));
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement;
+      if (!parent || !termPattern.test(node.nodeValue || "")) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      if (
+        parent.closest(".fx-text") ||
+        ["SCRIPT", "STYLE", "SELECT", "OPTION", "TEXTAREA"].includes(parent.tagName)
+      ) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach((node) => {
+    const span = document.createElement("span");
+    span.className = "term-text";
+    span.dataset.termTemplate = node.nodeValue;
+    span.textContent = node.nodeValue;
+    node.replaceWith(span);
+    termTextNodes.push(span);
+  });
+  document.querySelectorAll("[data-annotation]").forEach((element) => {
+    if (!termPattern.test(element.dataset.annotation || "")) return;
+    element.dataset.termAnnotationTemplate = element.dataset.annotation;
+    termAttributeTemplates.push(element);
+  });
+}
+
+function renderTerms() {
+  termTextNodes.forEach((node) => {
+    const template = node.dataset.termTemplate || "";
+    node.textContent = termMode === "full" ? expandTerms(template) : template;
+  });
+  fxAttributeTemplates.forEach((element) => {
+    const template = convertMoneyTemplate(element.dataset.fxAnnotationTemplate || "");
+    element.dataset.annotation = termMode === "full" ? expandTerms(template) : template;
+  });
+  termAttributeTemplates.forEach((element) => {
+    if (element.dataset.fxAnnotationTemplate) return;
+    const template = element.dataset.termAnnotationTemplate || "";
+    element.dataset.annotation = termMode === "full" ? expandTerms(template) : template;
+  });
+  termButtons.forEach((button) => {
+    const selected = button.dataset.termMode === termMode;
+    button.classList.toggle("is-active", selected);
+    button.setAttribute("aria-checked", String(selected));
+  });
+}
+
+function setTermMode(mode, persist = true) {
+  termMode = mode === "full" ? "full" : "short";
+  renderTerms();
+  if (persist) {
+    try {
+      localStorage.setItem(termStorageKey, termMode);
+    } catch {
+      // Local storage can be unavailable in strict browser contexts.
+    }
+  }
+}
+
+registerTermTemplates();
+termsReady = true;
+renderTerms();
+
+termButtons.forEach((button) => {
+  button.addEventListener("click", () => setTermMode(button.dataset.termMode));
+});
 
 let extractedData = window.REPORT_DATA || null;
 const dataStatus = document.querySelector("#data-status");
@@ -685,14 +802,90 @@ const dateHelper = document.querySelector("#date-helper");
 const dateApply = document.querySelector("#date-apply");
 const monthGrid = document.querySelector("#month-grid");
 const yearPicker = document.querySelector("#year-picker");
+const rangeStartLabel = document.querySelector("#range-start-label");
+const rangeEndLabel = document.querySelector("#range-end-label");
 const presetButtons = document.querySelectorAll("[data-preset]");
 let selectedRange = "May 2026";
+let rangeAnchor = null;
+let selectedRangeState = {
+  start: "2026-05",
+  end: "2026-05",
+};
+
+function monthKey(year, month) {
+  return `${year}-${String(monthOrder.indexOf(month) + 1).padStart(2, "0")}`;
+}
+
+function monthFromKey(key) {
+  const [year, rawMonth] = key.split("-");
+  const monthIndex = Number(rawMonth) - 1;
+  return {
+    key,
+    year,
+    month: monthOrder[monthIndex],
+    monthIndex,
+    label: `${monthOrder[monthIndex]} ${year}`,
+    shortLabel: `${monthShort[monthOrder[monthIndex]]} ${year}`,
+    value: Number(year) * 12 + monthIndex,
+  };
+}
+
+function compareMonthKeys(a, b) {
+  return monthFromKey(a).value - monthFromKey(b).value;
+}
+
+function sortRange(start, end) {
+  return compareMonthKeys(start, end) <= 0 ? { start, end } : { start: end, end: start };
+}
+
+function availableMonthKeys() {
+  if (!extractedData?.marketing?.sheets) return ["2026-05"];
+  return Object.entries(extractedData.marketing.sheets)
+    .flatMap(([year, sheet]) => (sheet.monthly || [])
+      .map((row) => row.Month)
+      .filter(Boolean)
+      .map((month) => monthKey(year, month)))
+    .filter((key, index, keys) => keys.indexOf(key) === index)
+    .sort(compareMonthKeys);
+}
+
+function rangeLabel(range = selectedRangeState) {
+  const start = monthFromKey(range.start);
+  const end = monthFromKey(range.end);
+  if (range.start === range.end) return start.label;
+  if (start.year === end.year) return `${monthShort[start.month]}-${monthShort[end.month]} ${end.year}`;
+  return `${start.shortLabel}-${end.shortLabel}`;
+}
+
+function updateRangeUi() {
+  const label = rangeLabel();
+  selectedRange = label;
+  if (dateLabel) dateLabel.textContent = label;
+  if (rangeStartLabel) rangeStartLabel.textContent = monthFromKey(selectedRangeState.start).label;
+  if (rangeEndLabel) rangeEndLabel.textContent = monthFromKey(selectedRangeState.end).label;
+  if (dateHelper) {
+    dateHelper.textContent = rangeAnchor
+      ? `Start set: ${monthFromKey(rangeAnchor).label}. Choose an end month.`
+      : `Selected: ${label}`;
+  }
+  monthGrid?.querySelectorAll("[data-month-key]").forEach((button) => {
+    const key = button.dataset.monthKey;
+    const value = monthFromKey(key).value;
+    const startValue = monthFromKey(selectedRangeState.start).value;
+    const endValue = monthFromKey(selectedRangeState.end).value;
+    button.classList.toggle("selected", key === selectedRangeState.start || key === selectedRangeState.end);
+    button.classList.toggle("in-range", value >= startValue && value <= endValue);
+    button.classList.toggle("range-start", key === selectedRangeState.start);
+    button.classList.toggle("range-end", key === selectedRangeState.end);
+  });
+}
 
 function renderYearPicker() {
   const years = availableYears();
   if (!yearPicker || years.length === 0) return;
   yearPicker.innerHTML = years.map((year) => `<option value="${year}">${year}</option>`).join("");
-  yearPicker.value = years.includes("2026") ? "2026" : years[0];
+  const endYear = monthFromKey(selectedRangeState.end).year;
+  yearPicker.value = years.includes(endYear) ? endYear : years[0];
   renderMonthGrid(yearPicker.value);
 }
 
@@ -701,19 +894,17 @@ function renderMonthGrid(year) {
   const months = availableMonthsForYear(year);
   monthGrid.innerHTML = months
     .map((month) => {
-      const label = `${month} ${year}`;
-      const selected = selectedRange === label ? " selected" : "";
-      return `<button type="button" data-month="${label}" class="${selected}">${monthShort[month]}</button>`;
+      const key = monthKey(year, month);
+      return `<button type="button" data-month-key="${key}">${monthShort[month]}</button>`;
     })
     .join("");
+  updateRangeUi();
 }
 
-function setSelectedRange(label) {
-  selectedRange = label;
-  dateHelper.textContent = `Selected: ${label}`;
-  monthGrid?.querySelectorAll("[data-month]").forEach((button) => {
-    button.classList.toggle("selected", label === button.dataset.month);
-  });
+function setSelectedRange(startKey, endKey = startKey, anchor = null) {
+  selectedRangeState = sortRange(startKey, endKey);
+  rangeAnchor = anchor;
+  updateRangeUi();
 }
 
 setDataStatus();
@@ -729,45 +920,73 @@ dateTrigger.addEventListener("click", () => {
 yearPicker?.addEventListener("change", () => renderMonthGrid(yearPicker.value));
 
 monthGrid?.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-month]");
-  if (button) setSelectedRange(button.dataset.month);
+  const button = event.target.closest("[data-month-key]");
+  if (!button) return;
+  const key = button.dataset.monthKey;
+  if (!rangeAnchor || (selectedRangeState.start !== selectedRangeState.end && !event.shiftKey)) {
+    setSelectedRange(key, key, key);
+    return;
+  }
+  setSelectedRange(rangeAnchor, key, null);
 });
 
 presetButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    const ranges = {
-      "last-month": "May 2026",
-      quarter: "Apr-Jun 2026",
-      year: "Jan-May 2026",
-    };
-    setSelectedRange(ranges[button.dataset.preset]);
+    const keys = availableMonthKeys();
+    const end = keys[keys.length - 1] || "2026-05";
+    const endParts = monthFromKey(end);
+    let start = end;
+    if (button.dataset.preset === "quarter") {
+      const quarterStartIndex = Math.floor(endParts.monthIndex / 3) * 3;
+      const candidate = `${endParts.year}-${String(quarterStartIndex + 1).padStart(2, "0")}`;
+      start = keys.includes(candidate) ? candidate : keys.find((key) => compareMonthKeys(key, candidate) >= 0) || end;
+    }
+    if (button.dataset.preset === "year") {
+      const candidate = `${endParts.year}-01`;
+      start = keys.includes(candidate) ? candidate : keys.find((key) => key.startsWith(`${endParts.year}-`)) || end;
+    }
+    if (yearPicker) yearPicker.value = endParts.year;
+    renderMonthGrid(endParts.year);
+    setSelectedRange(start, end, null);
   });
 });
 
 dateApply.addEventListener("click", () => {
   softPageTransition(() => {
-    dateLabel.textContent = selectedRange;
+    updateRangeUi();
     dateTrigger.setAttribute("aria-expanded", "false");
     datePopover.hidden = true;
   });
 });
 
 function selectedMonthParts() {
-  const match = selectedRange.match(/^([A-Za-z]+)\s+(\d{4})$/);
-  if (!match) return null;
-  return { month: match[1], year: match[2] };
+  return {
+    start: monthFromKey(selectedRangeState.start),
+    end: monthFromKey(selectedRangeState.end),
+  };
 }
 
 function selectedRowsForExport() {
-  const selected = selectedMonthParts();
-  if (!selected || !extractedData) {
+  if (!extractedData) {
     return { marketing: null, financial: null };
   }
+  const selectedKeys = availableMonthKeys()
+    .filter((key) => compareMonthKeys(key, selectedRangeState.start) >= 0 && compareMonthKeys(key, selectedRangeState.end) <= 0);
+  const collectRows = (source) => selectedKeys
+    .map((key) => {
+      const parts = monthFromKey(key);
+      return source?.sheets?.[parts.year]?.monthly
+        ?.find((row) => row.Month === parts.month) || null;
+    })
+    .filter(Boolean);
   return {
-    marketing: extractedData.marketing?.sheets?.[selected.year]?.monthly
-      ?.find((row) => row.Month === selected.month) || null,
-    financial: extractedData.financial?.sheets?.[selected.year]?.monthly
-      ?.find((row) => row.Month === selected.month) || null,
+    range: {
+      start: monthFromKey(selectedRangeState.start).label,
+      end: monthFromKey(selectedRangeState.end).label,
+      months: selectedKeys.map((key) => monthFromKey(key).label),
+    },
+    marketing: collectRows(extractedData.marketing),
+    financial: collectRows(extractedData.financial),
   };
 }
 
@@ -793,7 +1012,7 @@ function exportReport() {
   const timestamp = formatTimestamp(extractedData?.generatedAt);
   const safeRange = selectedRange.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   const payload = {
-    appName: extractedData?.appName || "AW3® Marketing Reporting",
+    appName: extractedData?.appName || "AW3® | RevOps Dashboard | Powered by D.O.G.E.",
     exportedAt: new Date().toISOString(),
     lastUpdated: timestamp.iso,
     selectedRange,
@@ -811,7 +1030,7 @@ function exportReport() {
     selectedSourceRows: selectedRowsForExport(),
     generatedFrom: extractedData?.generatedFrom || {},
   };
-  downloadJson(`aw3-marketing-reporting-${safeRange || "custom-export"}.json`, payload);
+  downloadJson(`aw3-revops-dashboard-${safeRange || "custom-export"}.json`, payload);
 }
 
 async function refreshHistoricalData() {
@@ -858,32 +1077,187 @@ const chatLog = document.querySelector("#chat-log");
 const chatForm = document.querySelector("#chat-form");
 const chatInput = document.querySelector("#chat-input");
 const promptButtons = document.querySelectorAll("[data-prompt]");
+const benchmarkSources = [
+  {
+    name: "HubSpot 2025 State of Sales",
+    url: "https://blog.hubspot.com/sales/hubspot-sales-strategy-report",
+    insight: "59.9% of sales teams are on track to meet or surpass revenue targets; 91% report win rates stable or improving; 93% say average deal sizes are steady or growing; 68% report lead quality improved year over year.",
+  },
+  {
+    name: "Norwest 2025 B2B Sales & Marketing Benchmark",
+    url: "https://8560290.fs1.hubspotusercontent-na1.net/hubfs/8560290/PDFs/Norwest-2025-B2B-Benchmark-Report.pdf",
+    insight: "B2B teams are tightening MQL definitions: 30% define MQLs as high-intent leads, while scoring-model definitions fell from 55% in 2023 to 25% in 2025.",
+  },
+  {
+    name: "LinkedIn 2024 B2B Marketing Benchmark",
+    url: "https://business.linkedin.com/advertise/resources/b2b-benchmark/2024",
+    insight: "B2B marketers cite social media, email, and blogs among leading content channels, and 82% say marketing can demonstrate impact to the C-suite.",
+  },
+];
+
+function sourceList() {
+  return benchmarkSources
+    .map((source) => `<li><a href="${source.url}" target="_blank" rel="noreferrer">${source.name}</a>: ${source.insight}</li>`)
+    .join("");
+}
+
+function currentRangeContext() {
+  return selectedRangeState.start === selectedRangeState.end
+    ? monthFromKey(selectedRangeState.start).label
+    : `${monthFromKey(selectedRangeState.start).label} to ${monthFromKey(selectedRangeState.end).label}`;
+}
+
+function analysisResponse({ headline, read, bullets, actions, includeSources = false }) {
+  return `
+    <p><strong>${headline}</strong> ${read}</p>
+    <ul>${bullets.map((item) => `<li>${item}</li>`).join("")}</ul>
+    <p><strong>Recommended next steps:</strong></p>
+    <ol>${actions.map((item) => `<li>${item}</li>`).join("")}</ol>
+    ${includeSources ? `<p><strong>Benchmark sources used:</strong></p><ul>${sourceList()}</ul>` : ""}
+  `;
+}
+
+function benchmarkAnalysis() {
+  return analysisResponse({
+    headline: `B2B benchmark read for ${currentRangeContext()}:`,
+    read: "AW3® is showing strong efficiency recovery, but the quality and revenue consistency signals are mixed against current B2B benchmarks.",
+    bullets: [
+      `HubSpot reports 91% of sales teams have stable or improving win rates. AW3® closed-won count improved month over month, but year-over-year closed-won value remains softer, so the benchmark read is positive on recovery but not yet on durability.`,
+      `HubSpot reports 93% of teams say average deal sizes are steady or growing. AW3® average order value is ${reportData.aov} and down ${reportData.revenueYoy === "-28.3%" ? "20.2% month over month" : "month over month"}, so deal quality is the clearest gap.`,
+      "Norwest shows B2B teams moving toward high-intent MQL definitions. AW3® lead volume is strong, but lead-to-opportunity conversion at 7.54% suggests qualification criteria and source quality should be audited.",
+      "LinkedIn shows B2B marketers still rely heavily on social, email, and blog channels. AW3® tracked May spend currently reads as 100% Meta, so the benchmark gap is channel evidence, not just channel mix.",
+    ],
+    actions: [
+      "Split May leads by source, campaign, and intent signal before judging CPL success.",
+      "Create a high-intent lead segment and compare its lead-to-opportunity rate against all leads.",
+      "Review won-deal size by source to find which campaigns create pipeline quality, not just volume.",
+      "Add email, organic, and referral source context to the recurring report so paid-social performance is benchmarked in a full B2B demand mix.",
+    ],
+    includeSources: true,
+  });
+}
 
 function answerQuestion(question) {
   const q = question.toLowerCase();
+  if (q.includes("benchmark") || q.includes("b2b") || q.includes("source")) {
+    return benchmarkAnalysis();
+  }
   if (q.includes("risk") || q.includes("concern")) {
-    return `The main risks are data quality and deal quality. Google Ads shows GBP 0 spend, AOV is down to ${reportData.aov}, and revenue is still ${reportData.revenueYoy} YoY despite stronger MoM efficiency.`;
+    return analysisResponse({
+      headline: "Risk read:",
+      read: "The biggest risks are data quality, deal quality, and revenue durability.",
+      bullets: [
+        `Google Ads shows £0 spend, which could be a true pause or a tracking gap. Until that is confirmed, channel-level conclusions are fragile.`,
+        `Average order value is ${reportData.aov}, down month over month, which conflicts with HubSpot's benchmark that 93% of teams report steady or growing deal sizes.`,
+        `Revenue is ${reportData.revenueYoy} year over year despite stronger month-over-month efficiency, so the rebound is not yet enough to prove durable growth.`,
+      ],
+      actions: [
+        "Audit Google Ads source data and UTMs before the next refresh.",
+        "Segment opportunities by source and lead intent to isolate low-quality volume.",
+        "Prioritise opportunity-stage conversion and average order value recovery over raw lead growth.",
+      ],
+      includeSources: true,
+    });
   }
   if (q.includes("mer") || q.includes("roas") || q.includes("efficiency")) {
-    return `MER improved to ${reportData.mer} because spend fell ${reportData.spendChange} MoM while revenue rose ${reportData.revenueMom}. ROAS also rose to ${reportData.roas}, helped by ${reportData.leads} leads and ${reportData.dealValue} in tracked deal value.`;
+    return analysisResponse({
+      headline: "Efficiency read:",
+      read: `Marketing efficiency ratio improved to ${reportData.mer} because spend fell ${reportData.spendChange} month over month while revenue rose ${reportData.revenueMom}.`,
+      bullets: [
+        `Return on ad spend is ${reportData.roas}, helped by ${reportData.leads} leads and ${reportData.dealValue} in tracked deal value.`,
+        "The efficiency gain is real at summary level, but it is vulnerable if Google Ads data is incomplete.",
+        "A lower spend base plus higher lead volume is positive, but the average order value decline means the business should inspect revenue per opportunity, not only cost per lead.",
+      ],
+      actions: [
+        "Lock the campaign/source reconciliation first.",
+        "Rank campaigns by deal value and closed-won rate, not just CPL.",
+        "Protect the winning Meta campaigns while testing budget back into proven high-intent channels.",
+      ],
+    });
   }
   if (q.includes("finance") || q.includes("revenue") || q.includes("reconcile")) {
-    return `The financial report shows ${reportData.revenue} revenue. Marketing deal value is ${reportData.dealRevenue} of revenue, spend is ${reportData.spendRevenue} of revenue, and the revenue target gap is ${reportData.targetGap}. That makes attribution timing worth checking.`;
+    return analysisResponse({
+      headline: "Finance reconciliation:",
+      read: `The financial report shows ${reportData.revenue} revenue for ${currentRangeContext()}.`,
+      bullets: [
+        `Marketing deal value is ${reportData.dealRevenue} of revenue, which is close enough to be useful but still leaves attribution and timing questions.`,
+        `Spend is ${reportData.spendRevenue} of revenue, and the revenue target gap is ${reportData.targetGap}.`,
+        "The most important reconciliation check is whether Salesforce close dates, finance recognition dates, and ad attribution windows are using the same month boundary.",
+      ],
+      actions: [
+        "Create a close-date versus recognised-revenue exception table.",
+        "Flag deals where source attribution is missing or overwritten.",
+        "Show marketing-sourced, marketing-influenced, and unattributed revenue separately in the next report.",
+      ],
+    });
   }
   if (q.includes("next") || q.includes("do") || q.includes("action")) {
-    return "Next steps: confirm whether Google Ads spend is truly zero, isolate the Meta campaigns behind the lower CPL, improve opportunity qualification to lift AOV, and reconcile Salesforce deal timing against financial revenue.";
+    return analysisResponse({
+      headline: "Action plan:",
+      read: "The next month should focus on protecting the efficiency gain while proving pipeline quality.",
+      bullets: [
+        "Media efficiency improved, but channel tracking needs verification.",
+        "Lead and opportunity volume rose, but average order value declined.",
+        "Revenue improved month over month, but is still behind target and last year.",
+      ],
+      actions: [
+        "Confirm whether Google Ads spend is truly zero or a tracker gap.",
+        "Isolate the Meta campaigns behind the lower cost per lead and compare their opportunity quality.",
+        "Add a high-intent lead definition aligned to Sales, matching the Norwest benchmark trend.",
+        "Reconcile Salesforce deal timing against financial revenue before executive reporting.",
+      ],
+      includeSources: true,
+    });
   }
   if (q.includes("lead") || q.includes("opportunit") || q.includes("funnel")) {
-    return `The funnel expanded at the top: leads reached ${reportData.leads} (${reportData.leadsChange} MoM) and opportunities reached ${reportData.opportunities} (${reportData.opportunitiesChange} MoM). The pressure point is converting that volume into higher-value wins.`;
+    return analysisResponse({
+      headline: "Funnel diagnosis:",
+      read: `The funnel expanded at the top: leads reached ${reportData.leads} (${reportData.leadsChange} month over month) and opportunities reached ${reportData.opportunities} (${reportData.opportunitiesChange} month over month).`,
+      bullets: [
+        "Lead-to-opportunity conversion is 7.54%, so increased lead volume is not automatically creating enough sales-ready demand.",
+        "Opportunity-to-won conversion is 16.13%, which means small movement in qualification quality can materially change revenue.",
+        "Norwest's benchmark trend toward high-intent MQL definitions is directly relevant: AW3® should separate casual form fills from buying-intent leads.",
+      ],
+      actions: [
+        "Tag every lead as high-intent, content-led, paid-social, paid-search, or referral.",
+        "Report conversion by intent tier rather than blended lead volume.",
+        "Run a lost-opportunity review focused on source, value, and sales handoff notes.",
+      ],
+      includeSources: true,
+    });
   }
-  return `For ${reportData.month}, spend was ${reportData.spend}, leads were ${reportData.leads}, revenue was ${reportData.revenue}, MER was ${reportData.mer}, and total deal value was ${reportData.dealValue}. The strongest signal is improved efficiency; the watchout is revenue still below last year and target.`;
+  return analysisResponse({
+    headline: `Executive analysis for ${currentRangeContext()}:`,
+    read: `Spend was ${reportData.spend}, leads were ${reportData.leads}, revenue was ${reportData.revenue}, marketing efficiency ratio was ${reportData.mer}, and total deal value was ${reportData.dealValue}.`,
+    bullets: [
+      "The strongest signal is improved efficiency: less spend produced more leads and higher month-over-month revenue.",
+      "The watchout is quality: average order value and year-over-year revenue remain soft.",
+      "The benchmark context says B2B teams are winning when lead quality and deal size improve; AW3® has volume momentum but needs stronger proof of quality.",
+    ],
+    actions: [
+      "Validate source data.",
+      "Segment by intent.",
+      "Optimise around opportunity quality and deal size.",
+    ],
+    includeSources: true,
+  });
 }
 
 function addMessage(type, text) {
   const message = document.createElement("article");
   message.className = `message ${type}`;
   const speaker = type === "user" ? "You" : "D.O.G.E. AI";
-  message.innerHTML = `<strong>${speaker}</strong><p>${text}</p>`;
+  const speakerLabel = document.createElement("strong");
+  speakerLabel.textContent = speaker;
+  const body = document.createElement("div");
+  if (type === "ai") {
+    body.innerHTML = text;
+  } else {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = text;
+    body.append(paragraph);
+  }
+  message.append(speakerLabel, body);
   chatLog.append(message);
   chatLog.scrollTop = chatLog.scrollHeight;
 }

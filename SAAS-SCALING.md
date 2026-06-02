@@ -1,4 +1,4 @@
-# Scaling AW3® Marketing Reporting Into A SaaS
+# Scaling AW3® | RevOps Dashboard | Powered by D.O.G.E. Into A SaaS
 
 ## Recommended SaaS Architecture
 

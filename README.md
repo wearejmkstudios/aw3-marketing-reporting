@@ -1,4 +1,4 @@
-# AW3® Marketing Reporting
+# AW3® | RevOps Dashboard | Powered by D.O.G.E.
 
 Private Google Workspace-protected marketing reporting app for AW3® D.O.G.E.
 
@@ -48,7 +48,7 @@ Only users with email addresses ending in one of the `GOOGLE_WORKSPACE_DOMAINS` 
 
 ## GitHub + Vercel Deploy
 
-1. Create a GitHub repo, e.g. `aw3-marketing-reporting`.
+1. Create a GitHub repo, e.g. `aw3-revops-dashboard-doge`.
 2. Commit this folder to the repo root.
 3. In Vercel, import the GitHub repo.
 4. Framework should auto-detect as Next.js.

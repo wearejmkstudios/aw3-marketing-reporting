@@ -144,7 +144,7 @@ def main():
     marketing_bytes = workbook_source("marketing-revops.xlsx", MARKETING_ID)
     financial_bytes = workbook_source("financial-reports.xlsx", FINANCIAL_ID)
     data = {
-        "appName": "AW3® Marketing Reporting",
+        "appName": "AW3® | RevOps Dashboard | Powered by D.O.G.E.",
         "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "generatedFrom": {
             "marketingWorkbook": "AW3® Marketing & RevOps/Sales Metrics (by FY)",

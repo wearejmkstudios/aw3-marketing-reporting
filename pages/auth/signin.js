@@ -37,7 +37,7 @@ export default function SignIn({ callbackUrl, error }) {
   return (
     <>
       <Head>
-        <title>Sign in | AW3® Marketing Reporting</title>
+        <title>Sign in | AW3® | RevOps Dashboard | Powered by D.O.G.E.</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/favicon.png" />
@@ -65,7 +65,7 @@ export default function SignIn({ callbackUrl, error }) {
             />
           </div>
 
-          <p className="eyebrow">AW3® Marketing Reporting</p>
+          <p className="eyebrow">AW3® | RevOps Dashboard | Powered by D.O.G.E.</p>
           <h1 id="signin-title">Sign in to view the monthly growth report.</h1>
           <p className="copy">
             Access is restricted to approved Google Workspace accounts for AW3® reporting.

@@ -1,6 +1,6 @@
 # Deployment Checklist
 
-Use this when shipping AW3® Marketing Reporting to GitHub and Vercel.
+Use this when shipping AW3® | RevOps Dashboard | Powered by D.O.G.E. to GitHub and Vercel.
 
 ## 1. Push To GitHub
 
